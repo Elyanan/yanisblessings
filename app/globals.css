@@ -1,0 +1,187 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Yani's Blessings Color Palette */
+  --background: #FFF7ED; /* Cream / warm white */
+  --foreground: #4A2412; /* Chocolate brown */
+  --card: #FFFFFF;
+  --card-foreground: #4A2412;
+  --popover: #FFFFFF;
+  --popover-foreground: #4A2412;
+  --primary: #E9A8A6; /* Soft blush pink */
+  --primary-foreground: #4A2412;
+  --secondary: #F3E3CF; /* Light beige */
+  --secondary-foreground: #4A2412;
+  --muted: #F3E3CF;
+  --muted-foreground: #6B4832;
+  --accent: #C58A3A; /* Honey gold */
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #E9D5C3;
+  --input: #F3E3CF;
+  --ring: #C58A3A;
+  --chart-1: #E9A8A6;
+  --chart-2: #C58A3A;
+  --chart-3: #B98255;
+  --chart-4: #4A2412;
+  --chart-5: #F3E3CF;
+  --radius: 1rem;
+  --sidebar: #FFF7ED;
+  --sidebar-foreground: #4A2412;
+  --sidebar-primary: #E9A8A6;
+  --sidebar-primary-foreground: #4A2412;
+  --sidebar-accent: #F3E3CF;
+  --sidebar-accent-foreground: #4A2412;
+  --sidebar-border: #E9D5C3;
+  --sidebar-ring: #C58A3A;
+  
+  /* Custom Bakery Colors */
+  --cream: #FFF7ED;
+  --blush: #E9A8A6;
+  --gold: #C58A3A;
+  --chocolate: #4A2412;
+  --beige: #F3E3CF;
+  --wood: #B98255;
+}
+
+.dark {
+  --background: #4A2412;
+  --foreground: #FFF7ED;
+  --card: #5C3420;
+  --card-foreground: #FFF7ED;
+  --popover: #5C3420;
+  --popover-foreground: #FFF7ED;
+  --primary: #E9A8A6;
+  --primary-foreground: #4A2412;
+  --secondary: #6B4832;
+  --secondary-foreground: #FFF7ED;
+  --muted: #6B4832;
+  --muted-foreground: #D4B8A0;
+  --accent: #C58A3A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #6B4832;
+  --input: #6B4832;
+  --ring: #C58A3A;
+  --chart-1: #E9A8A6;
+  --chart-2: #C58A3A;
+  --chart-3: #B98255;
+  --chart-4: #FFF7ED;
+  --chart-5: #6B4832;
+  --sidebar: #5C3420;
+  --sidebar-foreground: #FFF7ED;
+  --sidebar-primary: #E9A8A6;
+  --sidebar-primary-foreground: #4A2412;
+  --sidebar-accent: #6B4832;
+  --sidebar-accent-foreground: #FFF7ED;
+  --sidebar-border: #6B4832;
+  --sidebar-ring: #C58A3A;
+}
+
+@theme inline {
+  --font-sans: 'Inter', 'Inter Fallback', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', 'Georgia', serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Custom Colors */
+  --color-cream: var(--cream);
+  --color-blush: var(--blush);
+  --color-gold: var(--gold);
+  --color-chocolate: var(--chocolate);
+  --color-beige: var(--beige);
+  --color-wood: var(--wood);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--blush);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
