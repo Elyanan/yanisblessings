@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RegularOrderDetailSheet } from '@/components/admin/regular-order-detail-sheet'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ORDER_STATUSES } from '@/lib/order-status'
@@ -216,21 +217,26 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-serif text-3xl font-bold">Orders</h1>
-        <Button onClick={() => {
-          if (showForm) {
-            resetForm()
-            setShowForm(false)
-            setMessage('')
-          } else {
-            resetForm()
-            setShowForm(true)
-          }
-        }}>
-          {showForm ? 'Cancel' : 'Add order'}
-        </Button>
-      </div>
+      <AdminPageHeader
+        title="Orders"
+        actions={
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => {
+              if (showForm) {
+                resetForm()
+                setShowForm(false)
+                setMessage('')
+              } else {
+                resetForm()
+                setShowForm(true)
+              }
+            }}
+          >
+            {showForm ? 'Cancel' : 'Add order'}
+          </Button>
+        }
+      />
 
       {refreshing && <p className="text-sm text-muted-foreground">Refreshing...</p>}
 
@@ -277,9 +283,9 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
 
               <div className="space-y-3">
                 <Label>Items</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <Select value={menuPick} onValueChange={setMenuPick}>
-                    <SelectTrigger className="w-[220px]"><SelectValue placeholder="Add from menu" /></SelectTrigger>
+                    <SelectTrigger className="w-full sm:w-[220px]"><SelectValue placeholder="Add from menu" /></SelectTrigger>
                     <SelectContent>
                       {menuItems.map((item) => (
                         <SelectItem key={item._id} value={item._id}>
@@ -288,13 +294,16 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button type="button" variant="outline" onClick={addFromMenu} disabled={!menuPick}>
+                  <Button type="button" variant="outline" onClick={addFromMenu} disabled={!menuPick} className="w-full sm:w-auto">
                     Add item
                   </Button>
                 </div>
 
                 {lineItems.map((line, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_80px_100px_auto] gap-2 items-end">
+                  <div
+                    key={index}
+                    className="grid gap-2 rounded-lg border border-border/70 p-3 sm:border-0 sm:p-0 sm:rounded-none sm:grid-cols-[1fr_80px_100px_auto] sm:items-end"
+                  >
                     <div>
                       {index === 0 && <Label className="text-xs text-muted-foreground">Name</Label>}
                       <Input
@@ -303,25 +312,34 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
                         placeholder="Item name"
                       />
                     </div>
-                    <div>
-                      {index === 0 && <Label className="text-xs text-muted-foreground">Qty</Label>}
-                      <Input
-                        type="number"
-                        min={1}
-                        value={line.quantity}
-                        onChange={(e) => updateLine(index, 'quantity', Number(e.target.value) || 1)}
-                      />
+                    <div className="grid grid-cols-2 gap-2 sm:contents">
+                      <div>
+                        {index === 0 && <Label className="text-xs text-muted-foreground">Qty</Label>}
+                        <Input
+                          type="number"
+                          min={1}
+                          value={line.quantity}
+                          onChange={(e) => updateLine(index, 'quantity', Number(e.target.value) || 1)}
+                        />
+                      </div>
+                      <div>
+                        {index === 0 && <Label className="text-xs text-muted-foreground">Price (ETB)</Label>}
+                        <Input
+                          type="number"
+                          min={0}
+                          value={line.price}
+                          onChange={(e) => updateLine(index, 'price', Number(e.target.value) || 0)}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      {index === 0 && <Label className="text-xs text-muted-foreground">Price (ETB)</Label>}
-                      <Input
-                        type="number"
-                        min={0}
-                        value={line.price}
-                        onChange={(e) => updateLine(index, 'price', Number(e.target.value) || 0)}
-                      />
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(index)} aria-label="Remove line">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="justify-self-end sm:justify-self-auto"
+                      onClick={() => removeLine(index)}
+                      aria-label="Remove line"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -342,7 +360,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
               {message && (
                 <p className={`text-sm ${message.includes('saved') || message.includes('updated') ? 'text-green-600' : 'text-destructive'}`}>{message}</p>
               )}
-              <Button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update order' : 'Save order'}</Button>
+              <Button type="submit" className="w-full sm:w-auto" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update order' : 'Save order'}</Button>
             </form>
           </CardContent>
         </Card>
@@ -410,7 +428,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 mt-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <Button
                       size="icon"
                       variant="ghost"

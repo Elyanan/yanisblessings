@@ -54,12 +54,12 @@ export function RegularOrderDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
-        <div className="bg-gradient-to-br from-chocolate to-chocolate/90 text-cream px-6 pt-6 pb-8">
+      <SheetContent className="w-full max-w-[100vw] overflow-y-auto p-0 sm:max-w-lg">
+        <div className="bg-gradient-to-br from-chocolate to-chocolate/90 text-cream px-4 pt-6 pb-8 sm:px-6">
           <SheetHeader className="text-left space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <SheetTitle className="font-serif text-2xl text-cream">
+                <SheetTitle className="font-serif text-xl sm:text-2xl text-cream">
                   {order.orderNumber || 'Order'}
                 </SheetTitle>
                 <SheetDescription className="text-cream/70">
@@ -87,7 +87,7 @@ export function RegularOrderDetailSheet({
           </SheetHeader>
         </div>
 
-        <div className="px-6 py-6 space-y-6 -mt-4">
+        <div className="px-4 py-6 space-y-6 -mt-4 sm:px-6">
           <section className="rounded-2xl border bg-card shadow-sm p-4 space-y-3">
             <h3 className="font-serif font-semibold text-lg flex items-center gap-2">
               <User className="w-4 h-4 text-primary" />
@@ -99,14 +99,14 @@ export function RegularOrderDetailSheet({
               <CopyField label="Email" value={order.email ?? ''} href={order.email ? `mailto:${order.email}` : undefined} className="sm:col-span-2" />
               <CopyField label="Address" value={order.address} className="sm:col-span-2" />
             </div>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button size="sm" variant="outline" className="rounded-full" asChild>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 pt-1">
+              <Button size="sm" variant="outline" className="rounded-full w-full sm:w-auto" asChild>
                 <a href={`tel:${order.phone.replace(/\s/g, '')}`}>
                   <Phone className="w-4 h-4 mr-1" />
                   Call
                 </a>
               </Button>
-              <Button size="sm" className="rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white border-0" asChild>
+              <Button size="sm" className="rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white border-0 w-full sm:w-auto" asChild>
                 <a href={whatsappOrderUrl(whatsappText)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4 mr-1" />
                   WhatsApp
@@ -163,14 +163,14 @@ export function RegularOrderDetailSheet({
             </section>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-2 pb-4">
-            <Button variant="outline" className="rounded-full" onClick={() => onEdit(order)}>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 pt-2 pb-4 px-4 sm:px-6">
+            <Button variant="outline" className="rounded-full w-full sm:w-auto" onClick={() => onEdit(order)}>
               <Pencil className="w-4 h-4 mr-1" />
               Edit order
             </Button>
             <Button
               variant="outline"
-              className="rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto"
               onClick={() => onDelete(order._id)}
             >
               <Trash2 className="w-4 h-4 mr-1" />

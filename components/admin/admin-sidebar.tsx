@@ -4,7 +4,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { LayoutDashboard, ShoppingBag, Sparkles, UtensilsCrossed, Tags, LogOut, ExternalLink } from 'lucide-react'
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Sparkles,
+  UtensilsCrossed,
+  Tags,
+  LogOut,
+  ExternalLink,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import logo from '@/assets/logo.png'
@@ -18,11 +26,16 @@ const links = [
   { href: '/admin/studio', label: 'Sanity Studio', icon: ExternalLink },
 ]
 
-export function AdminSidebar() {
+type SidebarNavProps = {
+  onNavigate?: () => void
+  className?: string
+}
+
+export function AdminSidebarNav({ onNavigate, className }: SidebarNavProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-chocolate text-cream">
+    <div className={cn('flex h-full flex-col bg-chocolate text-cream', className)}>
       <div className="flex items-center gap-3 border-b border-cream/10 px-5 py-5">
         <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-cream/10">
           <Image src={logo} alt="Yani's Blessings" fill className="object-contain p-1" sizes="44px" />
@@ -38,8 +51,9 @@ export function AdminSidebar() {
           <Link
             key={href}
             href={href}
+            onClick={onNavigate}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
               pathname === href ? 'bg-primary text-primary-foreground' : 'text-cream/80 hover:bg-cream/10',
             )}
           >
@@ -59,6 +73,15 @@ export function AdminSidebar() {
           Log Out
         </Button>
       </div>
+    </div>
+  )
+}
+
+/** Desktop sidebar — hidden below lg */
+export function AdminSidebar() {
+  return (
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 lg:flex">
+      <AdminSidebarNav className="w-full" />
     </aside>
   )
 }

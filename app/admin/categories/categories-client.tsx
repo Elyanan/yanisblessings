@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { SanityCategory } from '@/lib/sanity/types'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
 
 const schema = z.object({
   _id: z.string().optional(),
@@ -83,7 +85,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-serif text-3xl font-bold">Categories</h1>
+      <AdminPageHeader title="Categories" />
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader><CardTitle>{watch('_id') ? 'Edit Category' : 'Add Category'}</CardTitle></CardHeader>
@@ -94,7 +96,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
               <div><Label>Title (Amharic)</Label><Input {...register('titleAm')} className="mt-1" /></div>
               <div><Label>Sort Order</Label><Input type="number" {...register('sortOrder')} className="mt-1" /></div>
               {message && <p className="text-sm text-muted-foreground">{message}</p>}
-              <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Category'}</Button>
+              <Button type="submit" className="w-full sm:w-auto" disabled={saving}>{saving ? 'Saving...' : 'Save Category'}</Button>
             </form>
           </CardContent>
         </Card>
@@ -104,6 +106,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
             {categories.length === 0 ? (
               <p className="text-muted-foreground text-sm">No categories yet.</p>
             ) : (
+              <ResponsiveTableWrap>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -143,6 +146,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
                   ))}
                 </TableBody>
               </Table>
+              </ResponsiveTableWrap>
             )}
           </CardContent>
         </Card>

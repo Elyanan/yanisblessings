@@ -34,16 +34,16 @@ export function MonthlyCharts({ data, monthLabel }: Props) {
   const totalOrders = data.reduce((sum, d) => sum + d.orders, 0)
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
       <Card className="overflow-hidden border-border/80 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="font-serif text-xl">Revenue</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-2 p-4 sm:p-6">
+          <CardTitle className="font-serif text-lg sm:text-xl">Revenue</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             {monthLabel} · {totalRevenue.toLocaleString()} ETB total
           </CardDescription>
         </CardHeader>
-        <CardContent className="pb-4">
-          <ChartContainer config={revenueConfig} className="h-[280px] w-full">
+        <CardContent className="pb-4 px-2 sm:px-6">
+          <ChartContainer config={revenueConfig} className="h-[220px] w-full sm:h-[280px]">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
@@ -58,11 +58,14 @@ export function MonthlyCharts({ data, monthLabel }: Props) {
                 axisLine={false}
                 tickMargin={8}
                 interval="preserveStartEnd"
+                tick={{ fontSize: 11 }}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
+                width={36}
+                tick={{ fontSize: 11 }}
                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
               />
               <ChartTooltip
@@ -91,14 +94,14 @@ export function MonthlyCharts({ data, monthLabel }: Props) {
       </Card>
 
       <Card className="overflow-hidden border-border/80 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="font-serif text-xl">Orders</CardTitle>
-          <CardDescription>
+        <CardHeader className="pb-2 p-4 sm:p-6">
+          <CardTitle className="font-serif text-lg sm:text-xl">Orders</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             {monthLabel} · {totalOrders} order{totalOrders === 1 ? '' : 's'} placed
           </CardDescription>
         </CardHeader>
-        <CardContent className="pb-4">
-          <ChartContainer config={ordersConfig} className="h-[280px] w-full">
+        <CardContent className="pb-4 px-2 sm:px-6">
+          <ChartContainer config={ordersConfig} className="h-[220px] w-full sm:h-[280px]">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="ordersGradient" x1="0" y1="0" x2="0" y2="1">
@@ -113,12 +116,15 @@ export function MonthlyCharts({ data, monthLabel }: Props) {
                 axisLine={false}
                 tickMargin={8}
                 interval="preserveStartEnd"
+                tick={{ fontSize: 11 }}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
+                width={28}
                 allowDecimals={false}
+                tick={{ fontSize: 11 }}
               />
               <ChartTooltip
                 content={

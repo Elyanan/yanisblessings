@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { SanityMenuItem, SanityCategory } from '@/lib/sanity/types'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
 
 const schema = z.object({
   _id: z.string().optional(),
@@ -150,7 +152,7 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-serif text-3xl font-bold">Menu Items</h1>
+      <AdminPageHeader title="Menu Items" />
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader><CardTitle>{watch('_id') ? 'Edit Item' : 'Add Item'}</CardTitle></CardHeader>
@@ -217,17 +219,17 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
                   {message}
                 </p>
               )}
-              <Button type="submit" disabled={saving || categories.length === 0}>{saving ? 'Saving...' : 'Save Item'}</Button>
+              <Button type="submit" className="w-full sm:w-auto" disabled={saving || categories.length === 0}>{saving ? 'Saving...' : 'Save Item'}</Button>
             </form>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
             <CardTitle>
               All Items ({filteredItems.length}{listCategoryFilter !== 'all' ? ` of ${items.length}` : ''})
             </CardTitle>
             <Select value={listCategoryFilter} onValueChange={setListCategoryFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter category" />
               </SelectTrigger>
               <SelectContent>
@@ -248,6 +250,7 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
                   : 'No items in this category.'}
               </p>
             ) : (
+              <ResponsiveTableWrap minWidth="36rem">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -305,6 +308,7 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
                   ))}
                 </TableBody>
               </Table>
+              </ResponsiveTableWrap>
             )}
           </CardContent>
         </Card>

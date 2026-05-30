@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ORDER_STATUSES } from '@/lib/order-status'
 import type { SanityCustomOrder } from '@/lib/sanity/types'
 import { CustomOrderDetailSheet } from '@/components/admin/custom-order-detail-sheet'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 
 const statuses = [...ORDER_STATUSES]
@@ -205,21 +206,26 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-serif text-3xl font-bold">Custom Orders</h1>
-        <Button onClick={() => {
-          if (showForm) {
-            resetForm()
-            setShowForm(false)
-            setMessage('')
-          } else {
-            resetForm()
-            setShowForm(true)
-          }
-        }}>
-          {showForm ? 'Cancel' : 'Add order'}
-        </Button>
-      </div>
+      <AdminPageHeader
+        title="Custom Orders"
+        actions={
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => {
+              if (showForm) {
+                resetForm()
+                setShowForm(false)
+                setMessage('')
+              } else {
+                resetForm()
+                setShowForm(true)
+              }
+            }}
+          >
+            {showForm ? 'Cancel' : 'Add order'}
+          </Button>
+        }
+      />
 
       {showForm && (
         <Card>
@@ -323,7 +329,7 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
               {message && (
                 <p className={`text-sm ${message.includes('saved') || message.includes('updated') ? 'text-green-600' : 'text-destructive'}`}>{message}</p>
               )}
-              <Button type="submit" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update custom order' : 'Save custom order'}</Button>
+              <Button type="submit" className="w-full sm:w-auto" disabled={saving}>{saving ? 'Saving...' : editingId ? 'Update custom order' : 'Save custom order'}</Button>
             </form>
           </CardContent>
         </Card>
@@ -399,7 +405,7 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 mt-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSelectedOrder(order)} aria-label="View">
                       <Eye className="w-4 h-4" />
                     </Button>
