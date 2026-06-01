@@ -2,6 +2,24 @@ import { getSanityClient, getSanityWriteClient } from './client'
 import type { SanityCategory, SanityCustomOrder, SanityMenuItem, SanityOrder } from './types'
 import { sanitizeCategory, sanitizeMenuItem } from './sanitize'
 
+async function safeSanityFetch<T>(label: string, fallback: T, fetcher: () => Promise<T>): Promise<T> {
+  try {
+    return await fetcher()
+  } catch (error) {
+    console.error(`[Sanity] ${label} failed:`, error)
+    return fallback
+  }
+}
+
+const emptyDashboardStats = {
+  totalOrders: 0,
+  totalRevenue: 0,
+  totalItemsOrdered: 0,
+  recentOrders: [] as Array<{ _id: string; _createdAt: string; customerName: string; total: number; status: string }>,
+  customOrderCount: 0,
+  recentCustomOrders: [] as Array<{ _id: string; _createdAt: string; customerName: string; productType: string; status: string }>,
+}
+
 export const menuItemsQuery = `*[_type == "menuItem"] | order(sortOrder asc, title asc) {
   _id, title, titleAm, description, descriptionAm, price, featured, availability, sortOrder,
   slug, ingredients,
@@ -42,40 +60,33 @@ export const dashboardStatsQuery = `{
 export async function fetchMenuItems(): Promise<SanityMenuItem[]> {
   const client = getSanityClient()
   if (!client) return []
-  return client.fetch(menuItemsQuery)
+  return safeSanityFetch('fetchMenuItems', [], () => client.fetch(menuItemsQuery))
 }
 
 export async function fetchCategories(): Promise<SanityCategory[]> {
   const client = getSanityClient()
   if (!client) return []
-  return client.fetch(categoriesQuery)
+  return safeSanityFetch('fetchCategories', [], () => client.fetch(categoriesQuery))
 }
 
 export async function fetchOrders(): Promise<SanityOrder[]> {
   const client = getSanityClient()
   if (!client) return []
-  return client.fetch(ordersQuery)
+  return safeSanityFetch('fetchOrders', [], () => client.fetch(ordersQuery))
 }
 
 export async function fetchCustomOrders(): Promise<SanityCustomOrder[]> {
   const client = getSanityClient()
   if (!client) return []
-  return client.fetch(customOrdersQuery)
+  return safeSanityFetch('fetchCustomOrders', [], () => client.fetch(customOrdersQuery))
 }
 
 export async function fetchDashboardStats() {
   const client = getSanityClient()
-  if (!client) {
-    return {
-      totalOrders: 0,
-      totalRevenue: 0,
-      totalItemsOrdered: 0,
-      recentOrders: [],
-      customOrderCount: 0,
-      recentCustomOrders: [],
-    }
-  }
-  return client.fetch(dashboardStatsQuery)
+  if (!client) return emptyDashboardStats
+  return safeSanityFetch('fetchDashboardStats', emptyDashboardStats, () =>
+    client.fetch(dashboardStatsQuery),
+  )
 }
 
 export async function fetchMonthOrdersForCharts() {
@@ -85,11 +96,13 @@ export async function fetchMonthOrdersForCharts() {
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  return client.fetch<Array<{ _createdAt: string; total: number; status: string }>>(
-    `*[_type == "order" && _createdAt >= $monthStart] | order(_createdAt asc) {
+  return safeSanityFetch('fetchMonthOrdersForCharts', [], () =>
+    client.fetch<Array<{ _createdAt: string; total: number; status: string }>>(
+      `*[_type == "order" && _createdAt >= $monthStart] | order(_createdAt asc) {
       _createdAt, total, status
     }`,
-    { monthStart },
+      { monthStart },
+    ),
   )
 }
 

@@ -10,7 +10,6 @@ import {
   User,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -19,11 +18,17 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { ORDER_STATUSES } from '@/lib/order-status'
 import { whatsappOrderUrl } from '@/lib/site-config'
 import type { SanityOrder } from '@/lib/sanity/types'
 import { OrderStatusBadge } from './order-status-badge'
 import { CopyField } from './copy-field'
+import {
+  orderDetailBodyClass,
+  orderDetailCardClass,
+  OrderDetailSectionHeader,
+  orderSheetCloseClass,
+  OrderStatusSelect,
+} from './order-detail-sheet-ui'
 
 type Props = {
   order: SanityOrder | null
@@ -54,15 +59,17 @@ export function RegularOrderDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full max-w-[100vw] overflow-y-auto p-0 sm:max-w-lg">
-        <div className="bg-gradient-to-br from-chocolate to-chocolate/90 text-cream px-4 pt-6 pb-8 sm:px-6">
-          <SheetHeader className="text-left space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <SheetTitle className="font-serif text-xl sm:text-2xl text-cream">
+      <SheetContent
+        className={`flex w-full max-w-[100vw] flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg ${orderSheetCloseClass}`}
+      >
+        <div className="relative shrink-0 bg-gradient-to-br from-chocolate via-chocolate to-chocolate/90 px-4 pb-6 pt-12 text-cream sm:px-6 sm:pb-8">
+          <SheetHeader className="space-y-4 p-0 text-left">
+            <div className="flex flex-col gap-3 pr-10 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="min-w-0">
+                <SheetTitle className="font-serif text-xl font-bold text-cream sm:text-2xl">
                   {order.orderNumber || 'Order'}
                 </SheetTitle>
-                <SheetDescription className="text-cream/70">
+                <SheetDescription className="mt-1 text-sm text-cream/75">
                   {new Date(order._createdAt).toLocaleString('en-ET', {
                     dateStyle: 'full',
                     timeStyle: 'short',
@@ -70,82 +77,107 @@ export function RegularOrderDetailSheet({
                   })}
                 </SheetDescription>
               </div>
-              <OrderStatusBadge status={order.status} className="shrink-0 border-cream/20" />
+              <OrderStatusBadge status={order.status} className="w-fit shrink-0" />
             </div>
-            <Select value={order.status} onValueChange={(v) => onStatusChange(order._id, v)}>
-              <SelectTrigger className="w-full bg-cream/10 border-cream/30 text-cream">
-                <SelectValue placeholder="Update status" />
-              </SelectTrigger>
-              <SelectContent>
-                {ORDER_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <OrderStatusSelect
+              value={order.status}
+              onValueChange={(v) => onStatusChange(order._id, v)}
+            />
           </SheetHeader>
         </div>
 
-        <div className="px-4 py-6 space-y-6 -mt-4 sm:px-6">
-          <section className="rounded-2xl border bg-card shadow-sm p-4 space-y-3">
-            <h3 className="font-serif font-semibold text-lg flex items-center gap-2">
-              <User className="w-4 h-4 text-primary" />
-              Customer
-            </h3>
-            <div className="grid gap-2 sm:grid-cols-2">
+        <div className={orderDetailBodyClass}>
+          <section className={`${orderDetailCardClass} space-y-4`}>
+            <OrderDetailSectionHeader icon={User} title="Customer" subtitle="Contact & delivery" />
+            <div className="grid gap-3 sm:grid-cols-2">
               <CopyField label="Name" value={order.customerName} />
-              <CopyField label="Phone" value={order.phone} href={`tel:${order.phone.replace(/\s/g, '')}`} />
-              <CopyField label="Email" value={order.email ?? ''} href={order.email ? `mailto:${order.email}` : undefined} className="sm:col-span-2" />
+              <CopyField
+                label="Phone"
+                value={order.phone}
+                href={`tel:${order.phone.replace(/\s/g, '')}`}
+              />
+              <CopyField
+                label="Email"
+                value={order.email ?? ''}
+                href={order.email ? `mailto:${order.email}` : undefined}
+                className="sm:col-span-2"
+              />
               <CopyField label="Address" value={order.address} className="sm:col-span-2" />
             </div>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-2 pt-1">
-              <Button size="sm" variant="outline" className="rounded-full w-full sm:w-auto" asChild>
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-4 sm:flex-row">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-10 w-full rounded-full border-primary/30 sm:w-auto"
+                asChild
+              >
                 <a href={`tel:${order.phone.replace(/\s/g, '')}`}>
-                  <Phone className="w-4 h-4 mr-1" />
-                  Call
+                  <Phone className="mr-1.5 h-4 w-4" />
+                  Call customer
                 </a>
               </Button>
-              <Button size="sm" className="rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white border-0 w-full sm:w-auto" asChild>
+              <Button
+                size="sm"
+                className="h-10 w-full rounded-full border-0 bg-[#25D366] text-white hover:bg-[#20BD5A] sm:w-auto"
+                asChild
+              >
                 <a href={whatsappOrderUrl(whatsappText)} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-1" />
+                  <MessageCircle className="mr-1.5 h-4 w-4" />
                   WhatsApp
                 </a>
               </Button>
             </div>
           </section>
 
-          <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b bg-muted/40 flex items-center gap-2">
-              <Package className="w-4 h-4 text-primary" />
-              <h3 className="font-serif font-semibold">Order items</h3>
-              <span className="text-xs text-muted-foreground ml-auto">{items.length} item{items.length !== 1 ? 's' : ''}</span>
+          <section className={`${orderDetailCardClass} overflow-hidden p-0`}>
+            <div className="flex items-center gap-3 border-b border-border/80 bg-muted/30 px-4 py-3 sm:px-5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15">
+                <Package className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-serif font-semibold text-foreground">Order items</h3>
+                <p className="text-xs text-muted-foreground">
+                  {items.length} item{items.length !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-            <ul className="divide-y">
+            <ul className="divide-y divide-border/60">
               {items.map((item, i) => (
-                <li key={i} className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-muted/20 transition-colors">
-                  <div>
+                <li
+                  key={i}
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/20 sm:px-5"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium text-foreground">{item.name}</p>
                     <p className="text-sm text-muted-foreground">
                       {item.quantity} × {item.price.toLocaleString()} ETB
                     </p>
                   </div>
-                  <p className="font-semibold text-foreground shrink-0">
+                  <p className="shrink-0 font-semibold text-foreground">
                     {(item.quantity * item.price).toLocaleString()} ETB
                   </p>
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-4 bg-secondary/30 space-y-2 text-sm">
+            <div className="space-y-2 border-t border-border/80 bg-gradient-to-br from-beige/40 to-secondary/20 px-4 py-4 text-sm sm:px-5">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
                 <span>{order.subtotal?.toLocaleString()} ETB</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Delivery</span>
-                <span>{order.deliveryFee === 0 ? 'FREE' : `${order.deliveryFee?.toLocaleString()} ETB`}</span>
+                <span>
+                  {order.deliveryFee === 0 ? (
+                    <span className="font-medium text-emerald-700">FREE</span>
+                  ) : (
+                    `${order.deliveryFee?.toLocaleString()} ETB`
+                  )}
+                </span>
               </div>
-              <Separator />
+              <Separator className="bg-border/80" />
               <div className="flex justify-between font-serif text-lg font-bold text-foreground">
                 <span>Total</span>
                 <span className="text-primary">{order.total?.toLocaleString()} ETB</span>
@@ -154,26 +186,32 @@ export function RegularOrderDetailSheet({
           </section>
 
           {order.notes && (
-            <section className="rounded-2xl border border-amber-200/60 bg-amber-50/50 p-4">
-              <h3 className="font-medium flex items-center gap-2 text-amber-900 mb-2">
-                <StickyNote className="w-4 h-4" />
+            <section className="rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50 to-amber-50/40 p-4 shadow-sm sm:p-5">
+              <h3 className="mb-2 flex items-center gap-2 font-medium text-amber-950">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
+                  <StickyNote className="h-4 w-4 text-amber-800" />
+                </span>
                 Notes
               </h3>
-              <p className="text-sm text-amber-950/90 leading-relaxed">{order.notes}</p>
+              <p className="text-sm leading-relaxed text-amber-950/90">{order.notes}</p>
             </section>
           )}
 
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 pt-2 pb-4 px-4 sm:px-6">
-            <Button variant="outline" className="rounded-full w-full sm:w-auto" onClick={() => onEdit(order)}>
-              <Pencil className="w-4 h-4 mr-1" />
+          <div className="flex flex-col gap-2 border-t border-border/60 pt-2 sm:flex-row sm:flex-wrap">
+            <Button
+              variant="outline"
+              className="h-11 w-full rounded-full sm:w-auto"
+              onClick={() => onEdit(order)}
+            >
+              <Pencil className="mr-1.5 h-4 w-4" />
               Edit order
             </Button>
             <Button
               variant="outline"
-              className="rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto"
+              className="h-11 w-full rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive sm:w-auto"
               onClick={() => onDelete(order._id)}
             >
-              <Trash2 className="w-4 h-4 mr-1" />
+              <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
           </div>

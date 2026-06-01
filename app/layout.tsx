@@ -56,10 +56,8 @@ export default async function RootLayout({
 
   return (
     <html lang={initialLanguage} className={`${inter.variable} ${playfair.variable} bg-background`} suppressHydrationWarning>
-      <head>
-        <LanguageScript />
-      </head>
       <body className="font-sans antialiased min-h-screen">
+        <LanguageScript />
         <LanguageProvider initialLanguage={initialLanguage}>
           <CartProvider>
             {children}

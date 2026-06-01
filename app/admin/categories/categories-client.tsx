@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pencil, Trash2 } from 'lucide-react'
 import type { SanityCategory } from '@/lib/sanity/types'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCategoryCards } from '@/components/admin/admin-category-cards'
 import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
 
 const schema = z.object({
@@ -28,6 +29,7 @@ type Props = {
 }
 
 export function AdminCategoriesClient({ initialCategories }: Props) {
+  const formRef = useRef<HTMLDivElement>(null)
   const [categories, setCategories] = useState(initialCategories)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -37,10 +39,16 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
     defaultValues: { sortOrder: 0 },
   })
 
+  const editingId = watch('_id')
+
   const load = async () => {
     const res = await fetch('/api/admin/categories', { credentials: 'include' })
     const data = await res.json()
     setCategories(data.categories ?? [])
+  }
+
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const onSubmit = async (data: FormData) => {
@@ -63,6 +71,11 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
     }
   }
 
+  const clearForm = () => {
+    reset({ sortOrder: 0 })
+    setMessage('')
+  }
+
   const editCategory = (cat: SanityCategory) => {
     reset({
       _id: cat._id,
@@ -70,6 +83,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
       titleAm: cat.titleAm,
       sortOrder: cat.sortOrder,
     })
+    scrollToForm()
   }
 
   const deleteCategory = async (id: string) => {
@@ -84,70 +98,130 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AdminPageHeader title="Categories" />
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader><CardTitle>{watch('_id') ? 'Edit Category' : 'Add Category'}</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <input type="hidden" {...register('_id')} />
-              <div><Label>Title</Label><Input {...register('title')} className="mt-1" /></div>
-              <div><Label>Title (Amharic)</Label><Input {...register('titleAm')} className="mt-1" /></div>
-              <div><Label>Sort Order</Label><Input type="number" {...register('sortOrder')} className="mt-1" /></div>
-              {message && <p className="text-sm text-muted-foreground">{message}</p>}
-              <Button type="submit" className="w-full sm:w-auto" disabled={saving}>{saving ? 'Saving...' : 'Save Category'}</Button>
-            </form>
+
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        <Card className="order-1 lg:order-2">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">
+              All Categories ({categories.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            {categories.length === 0 ? (
+              <p className="text-muted-foreground text-sm py-4 text-center sm:text-left">
+                No categories yet. Add one in the form below.
+              </p>
+            ) : (
+              <>
+                <AdminCategoryCards
+                  categories={categories}
+                  onEdit={editCategory}
+                  onDelete={deleteCategory}
+                />
+                <div className="hidden md:block">
+                  <ResponsiveTableWrap>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead className="w-20">Order</TableHead>
+                          <TableHead className="w-[88px]" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {categories.map((cat) => (
+                          <TableRow key={cat._id}>
+                            <TableCell>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium">{cat.title}</p>
+                                {cat.titleAm && (
+                                  <p className="text-sm text-muted-foreground truncate">{cat.titleAm}</p>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>{cat.sortOrder ?? 0}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  onClick={() => editCategory(cat)}
+                                  aria-label={`Edit ${cat.title}`}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => deleteCategory(cat._id)}
+                                  aria-label={`Delete ${cat.title}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ResponsiveTableWrap>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle>All Categories</CardTitle></CardHeader>
-          <CardContent>
-            {categories.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No categories yet.</p>
-            ) : (
-              <ResponsiveTableWrap>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Order</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {categories.map((cat) => (
-                    <TableRow key={cat._id}>
-                      <TableCell>{cat.title}</TableCell>
-                      <TableCell>{cat.sortOrder ?? 0}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted"
-                            onClick={() => editCategory(cat)}
-                            aria-label={`Edit ${cat.title}`}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => deleteCategory(cat._id)}
-                            aria-label={`Delete ${cat.title}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </ResponsiveTableWrap>
-            )}
+
+        <Card ref={formRef} className="order-2 lg:order-1 scroll-mt-20">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">
+              {editingId ? 'Edit Category' : 'Add Category'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <input type="hidden" {...register('_id')} />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Title</Label>
+                  <Input {...register('title')} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Title (Amharic)</Label>
+                  <Input {...register('titleAm')} className="mt-1" />
+                </div>
+              </div>
+
+              <div className="sm:max-w-[10rem]">
+                <Label>Sort Order</Label>
+                <Input type="number" {...register('sortOrder')} className="mt-1" />
+              </div>
+
+              {message && (
+                <p
+                  className={`text-sm ${
+                    message.includes('saved') ? 'text-green-600' : 'text-muted-foreground'
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <Button type="submit" className="w-full sm:w-auto" disabled={saving}>
+                  {saving ? 'Saving...' : editingId ? 'Update category' : 'Save category'}
+                </Button>
+                {editingId && (
+                  <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={clearForm}>
+                    Cancel edit
+                  </Button>
+                )}
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>

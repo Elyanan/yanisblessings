@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Script from 'next/script'
 import type { ReactNode } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -23,9 +24,11 @@ export function PolicyLayout({ title, description, children, jsonLd }: Props) {
   return (
     <>
       {schemas.map((schema, index) => (
-        <script
+        <Script
           key={index}
+          id={`policy-jsonld-${index}`}
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
