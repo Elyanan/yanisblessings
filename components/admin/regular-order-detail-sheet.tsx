@@ -18,7 +18,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { whatsappOrderUrl } from '@/lib/site-config'
+import { whatsappCustomerUrl } from '@/lib/whatsapp'
 import type { SanityOrder } from '@/lib/sanity/types'
 import { OrderStatusBadge } from './order-status-badge'
 import { CopyField } from './copy-field'
@@ -121,7 +121,7 @@ export function RegularOrderDetailSheet({
                 className="h-10 w-full rounded-full border-0 bg-[#25D366] text-white hover:bg-[#20BD5A] sm:w-auto"
                 asChild
               >
-                <a href={whatsappOrderUrl(whatsappText)} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappCustomerUrl(order.phone, whatsappText)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-1.5 h-4 w-4" />
                   WhatsApp
                 </a>

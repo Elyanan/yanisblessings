@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,6 +15,7 @@ import type { SanityCategory } from '@/lib/sanity/types'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCategoryCards } from '@/components/admin/admin-category-cards'
 import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
+import { refreshAdminData } from '@/lib/admin-refresh'
 
 const schema = z.object({
   _id: z.string().optional(),
@@ -29,6 +31,7 @@ type Props = {
 }
 
 export function AdminCategoriesClient({ initialCategories }: Props) {
+  const router = useRouter()
   const formRef = useRef<HTMLDivElement>(null)
   const [categories, setCategories] = useState(initialCategories)
   const [saving, setSaving] = useState(false)
@@ -45,6 +48,7 @@ export function AdminCategoriesClient({ initialCategories }: Props) {
     const res = await fetch('/api/admin/categories', { credentials: 'include' })
     const data = await res.json()
     setCategories(data.categories ?? [])
+    refreshAdminData(router)
   }
 
   const scrollToForm = () => {

@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import logo from '@/assets/logo.png'
+import logoWhite from '@/assets/logo_white.png'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -45,20 +45,36 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-beige via-background to-primary/10 flex items-center justify-center p-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-chocolate via-chocolate/95 to-chocolate/90 flex items-center justify-center p-4">
+      {loading && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-chocolate/80 backdrop-blur-sm">
+          <Loader2 className="h-10 w-10 animate-spin text-cream" />
+          <p className="text-cream/90 text-sm font-medium">Signing you in…</p>
+        </div>
+      )}
+
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="relative mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full bg-card shadow-md ring-4 ring-primary/10">
-            <Image src={logo} alt="Yani's Blessings" fill className="object-contain p-2" sizes="80px" priority />
+          <div className="relative mx-auto mb-4 h-24 w-48 sm:h-28 sm:w-56">
+            <Image
+              src={logoWhite}
+              alt="Yani's Blessings"
+              fill
+              className="object-contain"
+              sizes="224px"
+              priority
+            />
           </div>
-          <h1 className="font-serif text-2xl font-bold text-foreground">Admin Login</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sign in to manage your bakery</p>
+          <h1 className="font-serif text-2xl font-bold text-cream">Admin Login</h1>
+          <p className="text-cream/70 text-sm mt-1">Sign in to manage your bakery</p>
         </div>
 
-        <div className="bg-card/80 backdrop-blur-sm rounded-2xl shadow-lg border border-border/60 p-6">
-          <form onSubmit={handleSubmit} method="post" className="space-y-4" noValidate>
+        <div className="bg-cream/95 backdrop-blur-sm rounded-2xl shadow-xl border border-cream/30 p-6">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-chocolate">
+                Username
+              </Label>
               <Input
                 id="username"
                 name="username"
@@ -66,13 +82,16 @@ export default function AdminLoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="mt-1.5 rounded-xl"
+                disabled={loading}
+                className="mt-1.5 rounded-xl bg-background"
                 autoComplete="username"
                 placeholder="Enter username"
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-chocolate">
+                Password
+              </Label>
               <div className="relative mt-1.5">
                 <Input
                   id="password"
@@ -81,7 +100,8 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="rounded-xl pr-10"
+                  disabled={loading}
+                  className="rounded-xl pr-10 bg-background"
                   autoComplete="current-password"
                   placeholder="Enter password"
                 />
@@ -97,7 +117,14 @@ export default function AdminLoginPage() {
             </div>
             {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full rounded-xl" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </form>
         </div>

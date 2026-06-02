@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/lib/cart-context'
 import { useLanguage } from '@/lib/language-context'
-import { siteConfig, whatsappOrderUrl } from '@/lib/site-config'
+import { PaymentInstructions } from '@/components/checkout/payment-instructions'
+import { siteConfig } from '@/lib/site-config'
+import { whatsappCustomerUrl } from '@/lib/whatsapp'
 import { 
   Minus, 
   Plus, 
@@ -57,7 +59,7 @@ export default function CartPage() {
       `*Total:* ${(totalPrice + (totalPrice >= freeDeliveryThreshold ? 0 : deliveryFee)).toLocaleString()} ETB\n\n` +
       `${customerInfo.notes ? `*Notes:* ${customerInfo.notes}` : ''}`
     
-    window.open(whatsappOrderUrl(message), '_blank')
+    window.open(whatsappCustomerUrl(customerInfo.phone, message), '_blank')
   }
 
   const handlePlaceOrder = async () => {
@@ -311,6 +313,8 @@ export default function CartPage() {
                     <span>{(totalPrice + (totalPrice >= freeDeliveryThreshold ? 0 : deliveryFee)).toLocaleString()} ETB</span>
                   </div>
                 </div>
+
+                <PaymentInstructions />
 
                 {/* Customer Info Form */}
                 <div className="space-y-4 mb-6">

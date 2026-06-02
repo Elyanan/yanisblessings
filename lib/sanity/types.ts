@@ -63,4 +63,9 @@ export type SanityCustomOrder = {
   specialNotes?: string
   attachment?: { asset?: { url?: string } }
   status: OrderStatus
+  items?: Array<{ name: string; quantity: number; price: number }>
+  subtotal?: number
+  deliveryFee?: number
+  total?: number
+  deliveredAt?: string
 }

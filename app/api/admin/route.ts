@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { ORDER_STATUSES } from '@/lib/order-status'
 import { calculateOrderTotals, type OrderLineItem } from '@/lib/order-totals'
-import { deleteDocument, mutateCategory, mutateMenuItem, mutateOrder, mutateCustomOrder, updateDocumentStatus } from '@/lib/sanity/queries'
+import { deleteDocument, deliverCustomOrder, mutateCategory, mutateMenuItem, mutateOrder, mutateCustomOrder, updateDocumentStatus } from '@/lib/sanity/queries'
 import type { SanityOrder } from '@/lib/sanity/types'
 
 export async function PATCH(request: Request) {
@@ -14,8 +14,23 @@ export async function PATCH(request: Request) {
 
   try {
     if (action === 'updateStatus' && id && status) {
+      if (status === 'delivered' && body.documentType === 'customOrder') {
+        return NextResponse.json(
+          {
+            error:
+              'Custom orders must be marked delivered with final line items. Use the delivery form in the admin panel.',
+          },
+          { status: 400 },
+        )
+      }
       await updateDocumentStatus(id, status)
       return NextResponse.json({ success: true })
+    }
+
+    if (action === 'deliverCustomOrder' && id && Array.isArray(body.items)) {
+      const items = body.items as OrderLineItem[]
+      const result = await deliverCustomOrder(id, items)
+      return NextResponse.json({ success: true, result })
     }
 
     if (action === 'saveMenuItem' && document) {
@@ -60,6 +75,16 @@ export async function PATCH(request: Request) {
       const status = ORDER_STATUSES.includes(document.status)
         ? document.status
         : 'pending'
+
+      if (status === 'delivered') {
+        return NextResponse.json(
+          {
+            error:
+              'Cannot save custom orders as delivered without line items. Use deliverCustomOrder from the order details panel.',
+          },
+          { status: 400 },
+        )
+      }
 
       const result = await mutateCustomOrder({
         _id: document._id as string | undefined,

@@ -27,7 +27,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
           {/* Brand */}
           <div className="space-y-4">
-            <BrandLogo size="footer" className="drop-shadow-md" />
+            <BrandLogo size="footer" variant="white" className="drop-shadow-md" />
             <p className="text-cream/80 text-sm leading-relaxed">
               {t('footer.tagline')}
             </p>

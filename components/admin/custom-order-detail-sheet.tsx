@@ -22,10 +22,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { whatsappOrderUrl } from '@/lib/site-config'
+import { whatsappCustomerUrl } from '@/lib/whatsapp'
 import type { SanityCustomOrder } from '@/lib/sanity/types'
 import { OrderStatusBadge } from './order-status-badge'
 import { CopyField } from './copy-field'
+import { OrderLineItemsDisplay } from './order-line-items-display'
 import {
   orderDetailBodyClass,
   orderDetailCardClass,
@@ -157,13 +158,23 @@ export function CustomOrderDetailSheet({
                 className="h-10 w-full rounded-full border-0 bg-[#25D366] text-white hover:bg-[#20BD5A] sm:w-auto"
                 asChild
               >
-                <a href={whatsappOrderUrl(whatsappText)} target="_blank" rel="noopener noreferrer">
+                <a href={whatsappCustomerUrl(order.phone, whatsappText)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-1.5 h-4 w-4" />
                   WhatsApp
                 </a>
               </Button>
             </div>
           </section>
+
+          {order.status === 'delivered' && order.items && order.items.length > 0 && (
+            <OrderLineItemsDisplay
+              items={order.items}
+              subtotal={order.subtotal}
+              deliveryFee={order.deliveryFee}
+              total={order.total}
+              title="Final order items"
+            />
+          )}
 
           <section className="grid gap-3 sm:grid-cols-2">
             {order.preferredDate && (

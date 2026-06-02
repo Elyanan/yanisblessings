@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Pencil, Trash2, Search, Phone, Eye, Cake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,11 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ORDER_STATUSES } from '@/lib/order-status'
 import type { SanityCustomOrder } from '@/lib/sanity/types'
+import type { OrderLineItem } from '@/lib/order-totals'
+import { refreshAdminData } from '@/lib/admin-refresh'
 import { CustomOrderDetailSheet } from '@/components/admin/custom-order-detail-sheet'
+import { DeliverCustomOrderDialog } from '@/components/admin/deliver-custom-order-dialog'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 
 const statuses = [...ORDER_STATUSES]
+const formStatuses = statuses.filter((s) => s !== 'delivered')
 
 const productTypes = [
   'Birthday Cake',
@@ -37,10 +42,12 @@ type Props = {
 }
 
 export function AdminCustomOrdersClient({ initialOrders }: Props) {
+  const router = useRouter()
   const [orders, setOrders] = useState(initialOrders)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<SanityCustomOrder | null>(null)
+  const [deliverOrder, setDeliverOrder] = useState<SanityCustomOrder | null>(null)
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -75,6 +82,7 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
     const res = await fetch('/api/admin/custom-orders', { credentials: 'include' })
     const data = await res.json()
     setOrders(data.orders ?? [])
+    refreshAdminData(router)
   }
 
   const resetForm = () => {
@@ -136,16 +144,66 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
     load()
   }
 
-  const updateStatus = async (id: string, newStatus: string) => {
-    await fetch('/api/admin', {
+  const updateStatusDirect = async (id: string, newStatus: string) => {
+    const res = await fetch('/api/admin', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ action: 'updateStatus', id, status: newStatus }),
     })
-    setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, status: newStatus as SanityCustomOrder['status'] } : o)))
+    const payload = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(payload.error ?? 'Failed to update status')
+    }
+    setOrders((prev) =>
+      prev.map((o) => (o._id === id ? { ...o, status: newStatus as SanityCustomOrder['status'] } : o)),
+    )
     setSelectedOrder((prev) =>
       prev?._id === id ? { ...prev, status: newStatus as SanityCustomOrder['status'] } : prev,
+    )
+  }
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    if (newStatus === 'delivered') {
+      const order = orders.find((o) => o._id === id) ?? (selectedOrder?._id === id ? selectedOrder : null)
+      if (order) setDeliverOrder(order)
+      return
+    }
+    try {
+      await updateStatusDirect(id, newStatus)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update status')
+    }
+  }
+
+  const confirmDeliver = async (items: OrderLineItem[]) => {
+    if (!deliverOrder) return
+    const res = await fetch('/api/admin', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        action: 'deliverCustomOrder',
+        id: deliverOrder._id,
+        items,
+      }),
+    })
+    const payload = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(payload.error ?? 'Failed to mark order as delivered')
+    }
+    await load()
+    setSelectedOrder((prev) =>
+      prev?._id === deliverOrder._id
+        ? {
+            ...prev,
+            status: 'delivered',
+            items,
+            subtotal: items.reduce((s, i) => s + i.price * i.quantity, 0),
+            deliveryFee: 0,
+            total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+          }
+        : prev,
     )
   }
 
@@ -157,6 +215,12 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
     const resolvedProductType = productType === 'Other' ? customProductType.trim() : productType
     if (!customerName.trim() || !phone.trim() || !resolvedProductType) {
       setMessage('Fill in customer name, phone, and product type.')
+      setSaving(false)
+      return
+    }
+
+    if (status === 'delivered') {
+      setMessage('Mark orders as delivered from the order details panel to enter final items.')
       setSaving(false)
       return
     }
@@ -249,14 +313,28 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
                 </div>
                 <div>
                   <Label>Status</Label>
-                  <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {statuses.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {status === 'delivered' ? (
+                    <div className="mt-1">
+                      <OrderStatusBadge status="delivered" />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Change status from order details. Line items are locked while delivered.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                        <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {formStatuses.map((s) => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Use order details to mark as delivered with final line items.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -398,11 +476,17 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
                         Preferred: {new Date(order.preferredDate).toLocaleDateString()}
                       </p>
                     )}
-                    <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs text-muted-foreground">
-                      <span>{new Date(order._createdAt).toLocaleDateString()}</span>
-                      {order.attachment?.asset?.url && (
+                    <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs">
+                      <span className="text-muted-foreground">
+                        {new Date(order._createdAt).toLocaleDateString()}
+                      </span>
+                      {order.status === 'delivered' && order.total != null ? (
+                        <span className="font-semibold text-foreground text-sm">
+                          {order.total.toLocaleString()} ETB
+                        </span>
+                      ) : order.attachment?.asset?.url ? (
                         <span className="text-primary font-medium">Has image</span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 mt-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -433,9 +517,16 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
         order={selectedOrder}
         open={!!selectedOrder}
         onOpenChange={(open) => !open && setSelectedOrder(null)}
-        onStatusChange={updateStatus}
+        onStatusChange={handleStatusChange}
         onEdit={openEdit}
         onDelete={deleteOrder}
+      />
+
+      <DeliverCustomOrderDialog
+        open={!!deliverOrder}
+        onOpenChange={(open) => !open && setDeliverOrder(null)}
+        order={deliverOrder}
+        onConfirm={confirmDeliver}
       />
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Plus,
   Pencil,
@@ -21,6 +22,7 @@ import { OrderStatusBadge } from '@/components/admin/order-status-badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ORDER_STATUSES } from '@/lib/order-status'
 import { calculateOrderTotals, type OrderLineItem } from '@/lib/order-totals'
+import { refreshAdminData } from '@/lib/admin-refresh'
 import type { SanityMenuItem, SanityOrder } from '@/lib/sanity/types'
 
 const emptyLine = (): OrderLineItem => ({ name: '', quantity: 1, price: 0 })
@@ -31,6 +33,7 @@ type Props = {
 }
 
 export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
+  const router = useRouter()
   const [orders, setOrders] = useState(initialOrders)
   const [menuItems, setMenuItems] = useState(initialMenuItems)
   const [refreshing, setRefreshing] = useState(false)
@@ -77,6 +80,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
     setOrders(ordersRes.orders ?? [])
     setMenuItems(menuRes.items ?? [])
     setRefreshing(false)
+    refreshAdminData(router)
   }
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -92,6 +96,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
     setSelectedOrder((prev) =>
       prev?._id === id ? { ...prev, status: newStatus as SanityOrder['status'] } : prev,
     )
+    refreshAdminData(router)
   }
 
   const updateLine = (index: number, field: keyof OrderLineItem, value: string | number) => {

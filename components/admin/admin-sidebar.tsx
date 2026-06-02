@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import logo from '@/assets/logo.png'
+import logoWhite from '@/assets/logo_white.png'
 
 const links = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -37,8 +37,8 @@ export function AdminSidebarNav({ onNavigate, className }: SidebarNavProps) {
   return (
     <div className={cn('flex h-full flex-col bg-chocolate text-cream', className)}>
       <div className="flex items-center gap-3 border-b border-cream/10 px-5 py-5">
-        <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-cream/10">
-          <Image src={logo} alt="Yani's Blessings" fill className="object-contain p-1" sizes="44px" />
+        <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full bg-cream/10 ring-1 ring-cream/20">
+          <Image src={logoWhite} alt="Yani's Blessings" fill className="object-contain p-1.5" sizes="44px" />
         </div>
         <div className="min-w-0">
           <h1 className="font-serif text-base font-bold leading-tight truncate">Yani&apos;s Blessings</h1>

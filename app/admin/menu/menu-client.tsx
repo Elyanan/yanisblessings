@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -18,6 +19,7 @@ import type { SanityMenuItem, SanityCategory } from '@/lib/sanity/types'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminMenuItemCards } from '@/components/admin/admin-menu-item-cards'
 import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
+import { refreshAdminData } from '@/lib/admin-refresh'
 
 const schema = z.object({
   _id: z.string().optional(),
@@ -41,6 +43,7 @@ type Props = {
 }
 
 export function AdminMenuClient({ initialItems, initialCategories }: Props) {
+  const router = useRouter()
   const formRef = useRef<HTMLDivElement>(null)
   const [items, setItems] = useState(initialItems)
   const [categories, setCategories] = useState(initialCategories)
@@ -65,6 +68,7 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
     ])
     setItems(menuRes.items ?? [])
     setCategories(catRes.categories ?? [])
+    refreshAdminData(router)
   }
 
   const filteredItems = useMemo(() => {

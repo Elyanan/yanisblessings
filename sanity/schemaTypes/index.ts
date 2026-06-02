@@ -102,6 +102,24 @@ export const customOrder = defineType({
       },
       initialValue: 'pending',
     }),
+    defineField({
+      name: 'items',
+      title: 'Final order items',
+      description: 'Filled when the order is marked as delivered',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          { name: 'name', type: 'string', title: 'Item name' },
+          { name: 'quantity', type: 'number', title: 'Quantity' },
+          { name: 'price', type: 'number', title: 'Unit price (ETB)' },
+        ],
+      }],
+    }),
+    defineField({ name: 'subtotal', title: 'Subtotal (ETB)', type: 'number', readOnly: true }),
+    defineField({ name: 'deliveryFee', title: 'Delivery fee (ETB)', type: 'number', readOnly: true }),
+    defineField({ name: 'total', title: 'Total (ETB)', type: 'number', readOnly: true }),
+    defineField({ name: 'deliveredAt', title: 'Delivered at', type: 'datetime' }),
   ],
 })
 
