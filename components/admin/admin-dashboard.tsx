@@ -41,6 +41,67 @@ type Props = {
   }>
 }
 
+function RecentMenuOrderCards({
+  orders,
+}: {
+  orders: Array<{ _id: string; customerName: string; total: number; status: string }>
+}) {
+  return (
+    <ul className="space-y-3 md:hidden">
+      {orders.map((order) => (
+        <li key={order._id} className="rounded-xl border border-border bg-muted/20 p-3">
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-medium text-foreground truncate">{order.customerName}</p>
+            <Badge variant="secondary" className="shrink-0 capitalize">
+              {order.status}
+            </Badge>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {order.status === 'delivered' && order.total != null
+              ? `${order.total.toLocaleString()} ETB`
+              : '—'}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function RecentCustomOrderCards({
+  orders,
+}: {
+  orders: Array<{
+    _id: string
+    customerName: string
+    productType: string
+    status: string
+    total?: number
+  }>
+}) {
+  return (
+    <ul className="space-y-3 md:hidden">
+      {orders.map((order) => (
+        <li key={order._id} className="rounded-xl border border-border bg-muted/20 p-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="font-medium text-foreground truncate">{order.customerName}</p>
+              <p className="text-sm text-muted-foreground truncate">{order.productType}</p>
+            </div>
+            <Badge variant="secondary" className="shrink-0 capitalize">
+              {order.status}
+            </Badge>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {order.status === 'delivered' && order.total != null
+              ? `${order.total.toLocaleString()} ETB`
+              : '—'}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function PeriodToggle({ view }: { view: DashboardPeriodView }) {
   const router = useRouter()
 
@@ -49,12 +110,12 @@ function PeriodToggle({ view }: { view: DashboardPeriodView }) {
   }
 
   return (
-    <div className="inline-flex rounded-xl border border-border/80 bg-muted/30 p-1 shadow-inner">
+    <div className="inline-flex w-full rounded-xl border border-border/80 bg-muted/30 p-1 shadow-inner sm:w-auto">
       <button
         type="button"
         onClick={() => setView('monthly')}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4',
+          'inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none sm:px-4',
           view === 'monthly'
             ? 'bg-card text-foreground shadow-sm ring-1 ring-border/60'
             : 'text-muted-foreground hover:text-foreground',
@@ -67,7 +128,7 @@ function PeriodToggle({ view }: { view: DashboardPeriodView }) {
         type="button"
         onClick={() => setView('yearly')}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4',
+          'inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all sm:flex-none sm:px-4',
           view === 'yearly'
             ? 'bg-card text-foreground shadow-sm ring-1 ring-border/60'
             : 'text-muted-foreground hover:text-foreground',
@@ -133,10 +194,12 @@ export function AdminDashboard({
           description={metrics.periodLabel}
           className="flex-1"
         />
-        <PeriodToggle view={view} />
+        <div className="w-full sm:w-auto">
+          <PeriodToggle view={view} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           title="Total revenue"
           value={`${metrics.totalRevenue.toLocaleString()} ETB`}
@@ -179,34 +242,39 @@ export function AdminDashboard({
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             {recentOrders.length ? (
-              <ResponsiveTableWrap>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentOrders.map((order) => (
-                      <TableRow key={order._id}>
-                        <TableCell className="font-medium">{order.customerName}</TableCell>
-                        <TableCell>
-                          {order.status === 'delivered' && order.total != null
-                            ? `${order.total.toLocaleString()} ETB`
-                            : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="capitalize">
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ResponsiveTableWrap>
+              <>
+                <RecentMenuOrderCards orders={recentOrders} />
+                <div className="hidden md:block">
+                  <ResponsiveTableWrap>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {recentOrders.map((order) => (
+                          <TableRow key={order._id}>
+                            <TableCell className="font-medium">{order.customerName}</TableCell>
+                            <TableCell>
+                              {order.status === 'delivered' && order.total != null
+                                ? `${order.total.toLocaleString()} ETB`
+                                : '—'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="capitalize">
+                                {order.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ResponsiveTableWrap>
+                </div>
+              </>
             ) : (
               <p className="text-sm text-muted-foreground py-6 text-center">No orders yet</p>
             )}
@@ -222,36 +290,41 @@ export function AdminDashboard({
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             {recentCustomOrders.length ? (
-              <ResponsiveTableWrap>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentCustomOrders.map((order) => (
-                      <TableRow key={order._id}>
-                        <TableCell className="font-medium">{order.customerName}</TableCell>
-                        <TableCell className="max-w-[8rem] truncate">{order.productType}</TableCell>
-                        <TableCell>
-                          {order.status === 'delivered' && order.total != null
-                            ? `${order.total.toLocaleString()} ETB`
-                            : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="capitalize">
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ResponsiveTableWrap>
+              <>
+                <RecentCustomOrderCards orders={recentCustomOrders} />
+                <div className="hidden md:block">
+                  <ResponsiveTableWrap>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {recentCustomOrders.map((order) => (
+                          <TableRow key={order._id}>
+                            <TableCell className="font-medium">{order.customerName}</TableCell>
+                            <TableCell className="max-w-[8rem] truncate">{order.productType}</TableCell>
+                            <TableCell>
+                              {order.status === 'delivered' && order.total != null
+                                ? `${order.total.toLocaleString()} ETB`
+                                : '—'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="capitalize">
+                                {order.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ResponsiveTableWrap>
+                </div>
+              </>
             ) : (
               <p className="text-sm text-muted-foreground py-6 text-center">No custom orders yet</p>
             )}

@@ -46,7 +46,7 @@ export function DashboardCharts({ data, view, periodLabel }: Props) {
           <CardDescription className="text-xs sm:text-sm">{revenueSubtitle}</CardDescription>
         </CardHeader>
         <CardContent className="pb-4 px-1 sm:px-4 pt-4">
-          <ChartContainer config={revenueConfig} className="h-[240px] w-full sm:h-[300px]">
+          <ChartContainer config={revenueConfig} className="h-[220px] w-full sm:h-[300px]">
             <AreaChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardRevenueGradient" x1="0" y1="0" x2="0" y2="1">
@@ -61,6 +61,7 @@ export function DashboardCharts({ data, view, periodLabel }: Props) {
                 axisLine={false}
                 tickMargin={10}
                 interval="preserveStartEnd"
+                minTickGap={view === 'monthly' ? 14 : 8}
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
               />
               <YAxis
@@ -102,7 +103,7 @@ export function DashboardCharts({ data, view, periodLabel }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent className="pb-4 px-1 sm:px-4 pt-4">
-          <ChartContainer config={ordersConfig} className="h-[240px] w-full sm:h-[300px]">
+          <ChartContainer config={ordersConfig} className="h-[220px] w-full sm:h-[300px]">
             <AreaChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="dashboardOrdersGradient" x1="0" y1="0" x2="0" y2="1">
@@ -117,6 +118,7 @@ export function DashboardCharts({ data, view, periodLabel }: Props) {
                 axisLine={false}
                 tickMargin={10}
                 interval="preserveStartEnd"
+                minTickGap={view === 'monthly' ? 14 : 8}
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
               />
               <YAxis
