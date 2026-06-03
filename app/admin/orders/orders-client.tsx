@@ -46,6 +46,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
 
   const [customerName, setCustomerName] = useState('')
   const [phone, setPhone] = useState('')
+  const [telegram, setTelegram] = useState('')
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState('')
   const [notes, setNotes] = useState('')
@@ -125,6 +126,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
   const resetForm = () => {
     setCustomerName('')
     setPhone('')
+    setTelegram('')
     setEmail('')
     setAddress('')
     setNotes('')
@@ -138,6 +140,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
   const editOrder = (order: SanityOrder) => {
     setCustomerName(order.customerName)
     setPhone(order.phone)
+    setTelegram(order.telegram ?? '')
     setEmail(order.email ?? '')
     setAddress(order.address)
     setNotes(order.notes ?? '')
@@ -190,6 +193,7 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
           orderNumber: editingId && orderNumber ? orderNumber : `YB-WA-${Date.now()}`,
           customerName: customerName.trim(),
           phone: phone.trim(),
+          telegram: telegram.trim() || undefined,
           email: email.trim() || undefined,
           address: address.trim(),
           notes: notes.trim() || undefined,
@@ -260,6 +264,15 @@ export function AdminOrdersClient({ initialOrders, initialMenuItems }: Props) {
                 <div>
                   <Label>Phone</Label>
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" required />
+                </div>
+                <div>
+                  <Label>Telegram (optional)</Label>
+                  <Input
+                    value={telegram}
+                    onChange={(e) => setTelegram(e.target.value)}
+                    className="mt-1"
+                    placeholder="@username"
+                  />
                 </div>
                 <div>
                   <Label>Email (optional)</Label>

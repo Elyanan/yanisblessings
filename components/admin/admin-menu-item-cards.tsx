@@ -14,7 +14,7 @@ type Props = {
 
 export function AdminMenuItemCards({ items, onEdit, onDelete }: Props) {
   return (
-    <ul className="space-y-3 md:hidden">
+    <ul className="space-y-3 lg:hidden">
       {items.map((item) => (
         <li
           key={item._id}

@@ -45,12 +45,12 @@ export const categoriesQuery = `*[_type == "category"] | order(sortOrder asc, ti
 }`
 
 export const ordersQuery = `*[_type == "order"] | order(_createdAt desc) {
-  _id, _createdAt, orderNumber, customerName, phone, email, address, notes,
+  _id, _createdAt, orderNumber, customerName, phone, telegram, email, address, notes,
   items, subtotal, deliveryFee, total, status
 }`
 
 export const customOrdersQuery = `*[_type == "customOrder"] | order(_createdAt desc) {
-  _id, _createdAt, customerName, phone, email, productType, quantity, preferredDate,
+  _id, _createdAt, customerName, phone, telegram, email, productType, quantity, preferredDate,
   deliveryOption, deliveryArea, customMessage, flavorPreference, budgetRange, specialNotes,
   "attachment": attachment { asset-> { url } },
   status, items, subtotal, deliveryFee, total, deliveredAt

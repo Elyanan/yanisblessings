@@ -44,6 +44,12 @@ export const order = defineType({
     defineField({ name: 'orderNumber', title: 'Order Number', type: 'string' }),
     defineField({ name: 'customerName', title: 'Customer Name', type: 'string', validation: (r) => r.required() }),
     defineField({ name: 'phone', title: 'Phone', type: 'string', validation: (r) => r.required() }),
+    defineField({
+      name: 'telegram',
+      title: 'Telegram username',
+      type: 'string',
+      description: 'Customer @username (optional)',
+    }),
     defineField({ name: 'email', title: 'Email', type: 'string' }),
     defineField({ name: 'address', title: 'Address', type: 'text', validation: (r) => r.required() }),
     defineField({ name: 'notes', title: 'Notes', type: 'text' }),
@@ -82,6 +88,12 @@ export const customOrder = defineType({
   fields: [
     defineField({ name: 'customerName', title: 'Customer Name', type: 'string', validation: (r) => r.required() }),
     defineField({ name: 'phone', title: 'Phone', type: 'string', validation: (r) => r.required() }),
+    defineField({
+      name: 'telegram',
+      title: 'Telegram username',
+      type: 'string',
+      description: 'Customer @username (optional)',
+    }),
     defineField({ name: 'email', title: 'Email', type: 'string' }),
     defineField({ name: 'productType', title: 'Product Type', type: 'string' }),
     defineField({ name: 'quantity', title: 'Quantity', type: 'string' }),

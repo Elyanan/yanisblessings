@@ -1,15 +1,18 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { parseCartLineId } from '@/lib/granola-sizes'
 
 export interface CartItem {
   id: string
+  productId: string
   name: string
   nameAm?: string
   price: number
   quantity: number
   image: string
   category: string
+  sizeLabel?: string
 }
 
 interface CartContextType {
@@ -31,7 +34,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('yanis-cart')
     if (saved) {
       try {
-        setItems(JSON.parse(saved))
+        const parsed = JSON.parse(saved) as CartItem[]
+        setItems(
+          parsed.map((item) => {
+            const { productId } = parseCartLineId(item.id)
+            return {
+              ...item,
+              productId: item.productId ?? productId,
+            }
+          }),
+        )
       } catch {
         setItems([])
       }
@@ -43,14 +55,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items])
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
+    const { productId: parsedProductId } = parseCartLineId(item.id)
+    const normalized = {
+      ...item,
+      productId: item.productId ?? parsedProductId,
+    }
+
     setItems(prev => {
-      const existing = prev.find(i => i.id === item.id)
+      const existing = prev.find(i => i.id === normalized.id)
       if (existing) {
-        return prev.map(i => 
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        return prev.map(i =>
+          i.id === normalized.id ? { ...i, quantity: i.quantity + 1 } : i,
         )
       }
-      return [...prev, { ...item, quantity: 1 }]
+      return [...prev, { ...normalized, quantity: 1 }]
     })
   }
 

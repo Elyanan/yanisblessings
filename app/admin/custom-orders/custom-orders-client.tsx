@@ -57,7 +57,8 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
   const [email, setEmail] = useState('')
   const [productType, setProductType] = useState('')
   const [customProductType, setCustomProductType] = useState('')
-  const [quantity, setQuantity] = useState('')
+  const [quantity, setQuantity] = useState('1')
+  const [telegram, setTelegram] = useState('')
   const [preferredDate, setPreferredDate] = useState('')
   const [deliveryOption, setDeliveryOption] = useState('delivery')
   const [deliveryArea, setDeliveryArea] = useState('')
@@ -91,7 +92,8 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
     setEmail('')
     setProductType('')
     setCustomProductType('')
-    setQuantity('')
+    setQuantity('1')
+    setTelegram('')
     setPreferredDate('')
     setDeliveryOption('delivery')
     setDeliveryArea('')
@@ -114,7 +116,8 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
       setProductType('Other')
       setCustomProductType(order.productType)
     }
-    setQuantity(order.quantity ?? '')
+    setQuantity(order.quantity ?? '1')
+    setTelegram(order.telegram ?? '')
     setPreferredDate(order.preferredDate ?? '')
     setDeliveryOption(order.deliveryOption ?? 'delivery')
     setDeliveryArea(order.deliveryArea ?? '')
@@ -235,6 +238,7 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
           ...(editingId ? { _id: editingId } : {}),
           customerName: customerName.trim(),
           phone: phone.trim(),
+          telegram: telegram.trim() || undefined,
           email: email.trim() || undefined,
           productType: resolvedProductType,
           quantity: quantity.trim() || undefined,
@@ -306,6 +310,15 @@ export function AdminCustomOrdersClient({ initialOrders }: Props) {
                 <div>
                   <Label>Phone</Label>
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" required />
+                </div>
+                <div>
+                  <Label>Telegram (optional)</Label>
+                  <Input
+                    value={telegram}
+                    onChange={(e) => setTelegram(e.target.value)}
+                    className="mt-1"
+                    placeholder="@username"
+                  />
                 </div>
                 <div>
                   <Label>Email (optional)</Label>

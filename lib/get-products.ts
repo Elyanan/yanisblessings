@@ -1,4 +1,5 @@
 import type { Product } from '@/lib/products'
+import { buildGranolaSizes, isGranolaProduct } from '@/lib/granola-sizes'
 import { fetchCategories, fetchMenuItems } from '@/lib/sanity/queries'
 import type { SanityCategory, SanityMenuItem } from '@/lib/sanity/types'
 
@@ -12,7 +13,7 @@ function mapSanityProduct(item: SanityMenuItem): Product {
   const slug = item.slug?.current ?? item._id
   const categorySlug = item.category?.slug?.current ?? 'uncategorized'
 
-  return {
+  const product: Product = {
     id: slug,
     name: item.title,
     nameAm: item.titleAm ?? item.title,
@@ -25,6 +26,12 @@ function mapSanityProduct(item: SanityMenuItem): Product {
     featured: item.featured ?? false,
     ingredients: item.ingredients,
   }
+
+  if (isGranolaProduct(categorySlug)) {
+    product.sizes = buildGranolaSizes(item.price)
+  }
+
+  return product
 }
 
 function mapSanityCategories(cats: SanityCategory[]): CategoryFilter[] {

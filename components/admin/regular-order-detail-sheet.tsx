@@ -1,10 +1,8 @@
 'use client'
 
 import {
-  MessageCircle,
   Package,
   Pencil,
-  Phone,
   StickyNote,
   Trash2,
   User,
@@ -18,7 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Separator } from '@/components/ui/separator'
-import { whatsappCustomerUrl } from '@/lib/whatsapp'
+import { CustomerContactButtons } from '@/components/admin/customer-contact-buttons'
 import type { SanityOrder } from '@/lib/sanity/types'
 import { OrderStatusBadge } from './order-status-badge'
 import { CopyField } from './copy-field'
@@ -103,30 +101,19 @@ export function RegularOrderDetailSheet({
                 className="sm:col-span-2"
               />
               <CopyField label="Address" value={order.address} className="sm:col-span-2" />
+              {order.telegram && (
+                <CopyField
+                  label="Telegram"
+                  value={order.telegram.startsWith('@') ? order.telegram : `@${order.telegram}`}
+                  className="sm:col-span-2"
+                />
+              )}
             </div>
-            <div className="flex flex-col gap-2 border-t border-border/60 pt-4 sm:flex-row">
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-10 w-full rounded-full border-primary/30 sm:w-auto"
-                asChild
-              >
-                <a href={`tel:${order.phone.replace(/\s/g, '')}`}>
-                  <Phone className="mr-1.5 h-4 w-4" />
-                  Call customer
-                </a>
-              </Button>
-              <Button
-                size="sm"
-                className="h-10 w-full rounded-full border-0 bg-[#25D366] text-white hover:bg-[#20BD5A] sm:w-auto"
-                asChild
-              >
-                <a href={whatsappCustomerUrl(order.phone, whatsappText)} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="mr-1.5 h-4 w-4" />
-                  WhatsApp
-                </a>
-              </Button>
-            </div>
+            <CustomerContactButtons
+              phone={order.phone}
+              telegram={order.telegram}
+              message={whatsappText}
+            />
           </section>
 
           <section className={`${orderDetailCardClass} overflow-hidden p-0`}>

@@ -11,8 +11,10 @@ import { Input } from '@/components/ui/input'
 import { useCart } from '@/lib/cart-context'
 import { useLanguage } from '@/lib/language-context'
 import { PaymentInstructions } from '@/components/checkout/payment-instructions'
+import { calculateDeliveryTotals } from '@/lib/delivery'
 import { siteConfig } from '@/lib/site-config'
 import { whatsappCustomerUrl } from '@/lib/whatsapp'
+import { OrderSuccessScreen } from '@/components/order-success-screen'
 import { 
   Minus, 
   Plus, 
@@ -23,7 +25,6 @@ import {
   MessageCircle,
   Truck,
   Gift,
-  CheckCircle,
   Sparkles
 } from 'lucide-react'
 
@@ -41,8 +42,8 @@ export default function CartPage() {
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [orderError, setOrderError] = useState('')
 
-  const deliveryFee = siteConfig.deliveryFee
   const freeDeliveryThreshold = siteConfig.freeDeliveryThreshold
+  const { deliveryFee, total: orderTotal } = calculateDeliveryTotals(totalPrice)
 
   const handleWhatsAppOrder = () => {
     const itemsList = items.map(item => 
@@ -56,7 +57,7 @@ export default function CartPage() {
       `*Order Items:*\n${itemsList}\n\n` +
       `*Subtotal:* ${totalPrice.toLocaleString()} ETB\n` +
       `*Delivery:* ${totalPrice >= freeDeliveryThreshold ? 'FREE' : `${deliveryFee} ETB`}\n` +
-      `*Total:* ${(totalPrice + (totalPrice >= freeDeliveryThreshold ? 0 : deliveryFee)).toLocaleString()} ETB\n\n` +
+      `*Total:* ${orderTotal.toLocaleString()} ETB\n\n` +
       `${customerInfo.notes ? `*Notes:* ${customerInfo.notes}` : ''}`
     
     window.open(whatsappCustomerUrl(customerInfo.phone, message), '_blank')
@@ -94,46 +95,24 @@ export default function CartPage() {
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 pt-32 md:pt-40 pb-20 mt-8">
-          <div className="max-w-md w-full text-center">
-            <div className="relative mx-auto mb-6 h-28 w-28 sm:h-32 sm:w-32">
-              <Image
-                src={logo}
-                alt="Yani's Blessings"
-                fill
-                className="object-contain"
-                sizes="(max-width: 640px) 112px, 128px"
-                priority
-              />
-            </div>
-            <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-8">
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {t('cart.orderSuccess')}
-            </h1>
-            <p className="text-muted-foreground text-lg mb-8">
-              {t('cart.orderSuccessDesc')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/menu">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8">
-                  {t('btn.continueShopping')}
-                </Button>
-              </Link>
-              <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="rounded-full px-8">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  {t('btn.contactUs')}
-                </Button>
-              </a>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <OrderSuccessScreen
+        title={t('cart.orderSuccess')}
+        description={t('cart.orderSuccessDesc')}
+      >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/menu">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8">
+              {t('btn.continueShopping')}
+            </Button>
+          </Link>
+          <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
+              <MessageCircle className="w-5 h-5 mr-2" />
+              {t('btn.contactUs')}
+            </Button>
+          </a>
+        </div>
+      </OrderSuccessScreen>
     )
   }
 
@@ -226,6 +205,7 @@ export default function CartPage() {
                         </h3>
                         <p className="text-muted-foreground text-sm capitalize">
                           {item.category.replace('-', ' ')}
+                          {item.sizeLabel ? ` · ${item.sizeLabel}` : ''}
                         </p>
                       </div>
                       <button
@@ -310,7 +290,7 @@ export default function CartPage() {
                   )}
                   <div className="border-t border-border pt-3 flex justify-between font-serif font-bold text-lg text-foreground">
                     <span>{t('cart.total')}</span>
-                    <span>{(totalPrice + (totalPrice >= freeDeliveryThreshold ? 0 : deliveryFee)).toLocaleString()} ETB</span>
+                    <span>{orderTotal.toLocaleString()} ETB</span>
                   </div>
                 </div>
 

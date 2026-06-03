@@ -1,6 +1,6 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -12,12 +12,22 @@ import { useCart } from '@/lib/cart-context'
 import { useLanguage } from '@/lib/language-context'
 import { useProducts } from '@/lib/use-products'
 import { ProductCard } from '@/components/product-card'
+import { GranolaSizeSelector } from '@/components/granola-size-selector'
+import {
+  cartLineId,
+  formatItemNameWithSize,
+  getGranolaPrice,
+  getGranolaSizeOption,
+  isGranolaProduct,
+  type GranolaSizeKey,
+} from '@/lib/granola-sizes'
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { addItem, items, updateQuantity } = useCart()
   const { t, language } = useLanguage()
   const { products, loading } = useProducts()
+  const [selectedSize, setSelectedSize] = useState<GranolaSizeKey>('1kg')
 
   const product = products.find(p => p.id === id)
 
@@ -35,20 +45,33 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     )
   }
 
-  const cartItem = items.find(item => item.id === product.id)
+  const hasSizes = isGranolaProduct(product.category)
+  const lineId = hasSizes ? cartLineId(product.id, selectedSize) : product.id
+  const cartItem = items.find((item) => item.id === lineId)
   const quantity = cartItem?.quantity || 0
 
   const name = language === 'am' ? product.nameAm : product.name
   const description = language === 'am' ? product.descriptionAm : product.description
+  const sizeOption = hasSizes ? getGranolaSizeOption(selectedSize) : null
+  const displayPrice = hasSizes
+    ? getGranolaPrice(product.price, selectedSize)
+    : product.price
+  const sizeLabel = sizeOption
+    ? language === 'am'
+      ? sizeOption.labelAm
+      : sizeOption.label
+    : undefined
 
   const handleAdd = () => {
     addItem({
-      id: product.id,
-      name: product.name,
-      nameAm: product.nameAm,
-      price: product.price,
+      id: lineId,
+      productId: product.id,
+      name: formatItemNameWithSize(product.name, sizeLabel),
+      nameAm: formatItemNameWithSize(product.nameAm, sizeLabel),
+      price: displayPrice,
       image: product.image,
       category: product.category,
+      sizeLabel,
     })
   }
 
@@ -106,9 +129,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
                   {name}
                 </h1>
-                <p className="text-2xl font-serif font-bold text-primary mb-6">
-                  {product.price.toLocaleString()} {t('common.etb')}
+                <p className="text-2xl font-serif font-bold text-primary mb-4">
+                  {displayPrice.toLocaleString()} {t('common.etb')}
+                  {hasSizes && sizeLabel && (
+                    <span className="text-base font-sans font-normal text-muted-foreground ml-2">
+                      / {sizeLabel}
+                    </span>
+                  )}
                 </p>
+                {hasSizes && (
+                  <GranolaSizeSelector
+                    basePrice={product.price}
+                    selectedSize={selectedSize}
+                    onSizeChange={setSelectedSize}
+                    language={language}
+                    className="mb-6"
+                  />
+                )}
                 <p className="text-muted-foreground text-lg leading-relaxed">
                   {description}
                 </p>
@@ -147,14 +184,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <div className="flex items-center gap-4 flex-1">
                       <div className="flex items-center gap-3 bg-beige rounded-full p-2">
                         <button
-                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          onClick={() => updateQuantity(lineId, quantity - 1)}
                           className="w-10 h-10 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"
                         >
                           <Minus className="w-5 h-5" />
                         </button>
                         <span className="w-8 text-center font-medium text-lg">{quantity}</span>
                         <button
-                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                          onClick={() => updateQuantity(lineId, quantity + 1)}
                           className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
                         >
                           <Plus className="w-5 h-5" />

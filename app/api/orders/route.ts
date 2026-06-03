@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { buildRegularOrderEmailParams, sendRegularOrderEmail } from '@/lib/email/order-emails'
 import { createOrderDocument } from '@/lib/sanity/queries'
-import { siteConfig } from '@/lib/site-config'
+import { calculateDeliveryTotals } from '@/lib/delivery'
 
 const orderSchema = z.object({
   customerName: z.string().min(1),
@@ -28,8 +28,7 @@ export async function POST(request: Request) {
 
     const { customerName, phone, email, address, notes, items } = parsed.data
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const deliveryFee = subtotal >= siteConfig.freeDeliveryThreshold ? 0 : siteConfig.deliveryFee
-    const total = subtotal + deliveryFee
+    const { deliveryFee, total } = calculateDeliveryTotals(subtotal)
     const createdAt = new Date()
     const orderNumber = `YB-${Date.now()}`
 

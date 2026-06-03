@@ -1,10 +1,20 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Plus, Minus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { GranolaSizeSelector } from '@/components/granola-size-selector'
 import { useCart } from '@/lib/cart-context'
 import { useLanguage } from '@/lib/language-context'
+import {
+  cartLineId,
+  formatItemNameWithSize,
+  getGranolaPrice,
+  getGranolaSizeOption,
+  isGranolaProduct,
+  type GranolaSizeKey,
+} from '@/lib/granola-sizes'
 import type { Product } from '@/lib/products'
 import Link from 'next/link'
 
@@ -16,21 +26,35 @@ interface ProductCardProps {
 export function ProductCard({ product, showDescription = true }: ProductCardProps) {
   const { addItem, items, updateQuantity } = useCart()
   const { language, t } = useLanguage()
+  const hasSizes = isGranolaProduct(product.category)
+  const [selectedSize, setSelectedSize] = useState<GranolaSizeKey>('1kg')
 
-  const cartItem = items.find(item => item.id === product.id)
+  const lineId = hasSizes ? cartLineId(product.id, selectedSize) : product.id
+  const cartItem = items.find((item) => item.id === lineId)
   const quantity = cartItem?.quantity || 0
 
   const name = language === 'am' ? product.nameAm : product.name
   const description = language === 'am' ? product.descriptionAm : product.description
+  const sizeOption = hasSizes ? getGranolaSizeOption(selectedSize) : null
+  const displayPrice = hasSizes
+    ? getGranolaPrice(product.price, selectedSize)
+    : product.price
+  const sizeLabel = sizeOption
+    ? language === 'am'
+      ? sizeOption.labelAm
+      : sizeOption.label
+    : undefined
 
   const handleAdd = () => {
     addItem({
-      id: product.id,
-      name: product.name,
-      nameAm: product.nameAm,
-      price: product.price,
+      id: lineId,
+      productId: product.id,
+      name: formatItemNameWithSize(product.name, sizeLabel),
+      nameAm: formatItemNameWithSize(product.nameAm, sizeLabel),
+      price: displayPrice,
       image: product.image,
       category: product.category,
+      sizeLabel,
     })
   }
 
@@ -68,17 +92,28 @@ export function ProductCard({ product, showDescription = true }: ProductCardProp
             {name}
           </h3>
         </Link>
-        
+
         {showDescription && (
           <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
             {description}
           </p>
         )}
 
+        {hasSizes && product.available && (
+          <GranolaSizeSelector
+            basePrice={product.price}
+            selectedSize={selectedSize}
+            onSizeChange={setSelectedSize}
+            language={language}
+            compact
+            className="mt-3"
+          />
+        )}
+
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-baseline gap-1">
             <span className="font-serif text-xl font-bold text-gold">
-              {product.price.toLocaleString()}
+              {displayPrice.toLocaleString()}
             </span>
             <span className="text-muted-foreground text-sm">ETB</span>
           </div>
@@ -95,7 +130,7 @@ export function ProductCard({ product, showDescription = true }: ProductCardProp
               ) : (
                 <div className="flex items-center gap-2 bg-secondary rounded-full px-2 py-1">
                   <button
-                    onClick={() => updateQuantity(product.id, quantity - 1)}
+                    onClick={() => updateQuantity(lineId, quantity - 1)}
                     className="w-8 h-8 rounded-full bg-background flex items-center justify-center hover:bg-primary/20 transition-colors"
                     aria-label="Decrease quantity"
                   >

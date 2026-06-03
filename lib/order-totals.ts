@@ -1,4 +1,4 @@
-import { siteConfig } from '@/lib/site-config'
+import { calculateDeliveryTotals } from '@/lib/delivery'
 
 export type OrderLineItem = {
   name: string
@@ -6,11 +6,7 @@ export type OrderLineItem = {
   price: number
 }
 
-export function calculateOrderTotals(items: OrderLineItem[]) {
+export function calculateOrderTotals(items: OrderLineItem[], deliveryZoneId?: string) {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const deliveryFee =
-    subtotal >= siteConfig.freeDeliveryThreshold ? 0 : siteConfig.deliveryFee
-  const total = subtotal + deliveryFee
-
-  return { subtotal, deliveryFee, total }
+  return calculateDeliveryTotals(subtotal, deliveryZoneId)
 }

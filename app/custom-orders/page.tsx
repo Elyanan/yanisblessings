@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Cake, Gift, Building2, Calendar, Upload, Sparkles, CheckCircle } from 'lucide-react'
-import logo from '@/assets/logo.png'
+import { Cake, Gift, Building2, Calendar, Upload, Sparkles } from 'lucide-react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useLanguage } from '@/lib/language-context'
 import { siteConfig } from '@/lib/site-config'
+import { OrderSuccessScreen } from '@/components/order-success-screen'
 
 const productTypes = [
   { id: 'birthday-cake', label: 'Birthday Cake', labelAm: 'የልደት ኬክ', icon: Cake },
@@ -52,7 +52,7 @@ export default function CustomOrdersPage() {
     phone: '',
     email: '',
     productType: '',
-    quantity: '',
+    quantity: '1',
     preferredDate: '',
     deliveryOption: 'delivery',
     deliveryArea: '',
@@ -68,6 +68,24 @@ export default function CustomOrdersPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const resetForm = () => {
+    setFormData({
+      fullName: '',
+      phone: '',
+      email: '',
+      productType: '',
+      quantity: '1',
+      preferredDate: '',
+      deliveryOption: 'delivery',
+      deliveryArea: '',
+      customMessage: '',
+      flavorPreference: '',
+      budgetRange: '',
+      specialNotes: '',
+    })
+    setAttachment(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,46 +129,27 @@ export default function CustomOrdersPage() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 pt-32 md:pt-40 pb-20 mt-8">
-          <div className="max-w-md w-full text-center">
-            <div className="relative mx-auto mb-6 h-28 w-28 sm:h-32 sm:w-32">
-              <Image
-                src={logo}
-                alt="Yani's Blessings"
-                fill
-                className="object-contain"
-                sizes="(max-width: 640px) 112px, 128px"
-                priority
-              />
-            </div>
-            <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-8">
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
-              {t('custom.successTitle')}
-            </h1>
-            <p className="text-muted-foreground text-lg mb-8">
-              {t('custom.successDesc')}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => setIsSubmitted(false)}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8"
-              >
-                {t('custom.submitAnother')}
-              </Button>
-              <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
-                  {t('btn.contactUs')}
-                </Button>
-              </a>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <OrderSuccessScreen
+        title={t('custom.successTitle')}
+        description={t('custom.successDesc')}
+      >
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button
+            onClick={() => {
+              resetForm()
+              setIsSubmitted(false)
+            }}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8"
+          >
+            {t('custom.submitAnother')}
+          </Button>
+          <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
+              {t('btn.contactUs')}
+            </Button>
+          </a>
+        </div>
+      </OrderSuccessScreen>
     )
   }
 

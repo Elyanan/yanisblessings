@@ -36,6 +36,7 @@ export type SanityOrder = {
   orderNumber?: string
   customerName: string
   phone: string
+  telegram?: string
   email?: string
   address: string
   notes?: string
@@ -51,6 +52,7 @@ export type SanityCustomOrder = {
   _createdAt: string
   customerName: string
   phone: string
+  telegram?: string
   email?: string
   productType: string
   quantity?: string

@@ -171,7 +171,7 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       <AdminPageHeader title="Menu Items" />
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
@@ -210,8 +210,8 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
                   onEdit={editItem}
                   onDelete={deleteItem}
                 />
-                <div className="hidden md:block">
-                  <ResponsiveTableWrap minWidth="36rem">
+                <div className="hidden lg:block">
+                  <ResponsiveTableWrap minWidth="32rem">
                     <Table>
                       <TableHeader>
                         <TableRow>

@@ -1,3 +1,7 @@
+import { deliveryConfig, getDeliveryZone } from '@/lib/delivery'
+
+const defaultZone = getDeliveryZone()
+
 export const siteConfig = {
   name: "Yani's Blessings",
   phone: '+251926773391',
@@ -9,8 +13,8 @@ export const siteConfig = {
   emailMailto: 'mailto:hello@yanisblessings.com',
   location: 'Addis Ababa, Ethiopia',
   ownerEmail: process.env.OWNER_EMAIL ?? 'hello@yanisblessings.com',
-  deliveryFee: 100,
-  freeDeliveryThreshold: 1000,
+  deliveryFee: defaultZone.fee,
+  freeDeliveryThreshold: deliveryConfig.freeDeliveryThreshold,
   social: {
     instagram: 'https://instagram.com/yanisblessings',
     facebook: 'https://facebook.com/yanisblessings',
