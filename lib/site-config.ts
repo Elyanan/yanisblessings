@@ -1,4 +1,5 @@
 import { deliveryConfig, getDeliveryZone } from '@/lib/delivery'
+import { telegramCustomerUrl } from '@/lib/telegram'
 
 const defaultZone = getDeliveryZone()
 
@@ -9,6 +10,11 @@ export const siteConfig = {
   phoneTel: 'tel:+251926773391',
   whatsappNumber: '251926773391',
   whatsappUrl: 'https://wa.me/251926773391',
+  telegramUrl:
+    telegramCustomerUrl(
+      process.env.NEXT_PUBLIC_TELEGRAM_USERNAME ?? null,
+      '+251926773391',
+    ) ?? 'https://t.me/+251926773391',
   email: 'hello@yanisblessings.com',
   emailMailto: 'mailto:hello@yanisblessings.com',
   location: 'Addis Ababa, Ethiopia',
@@ -28,4 +34,9 @@ export const siteConfig = {
 
 export function whatsappOrderUrl(message: string) {
   return `${siteConfig.whatsappUrl}?text=${encodeURIComponent(message)}`
+}
+
+export function telegramOrderUrl(message: string) {
+  const base = siteConfig.telegramUrl
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Instagram, Facebook, Phone, MessageCircle, Mail, MapPin } from 'lucide-react'
 import { BrandLogo } from '@/components/brand-logo'
+import { TelegramIcon } from '@/components/telegram-icon'
 import { useLanguage } from '@/lib/language-context'
 import { siteConfig } from '@/lib/site-config'
 
@@ -108,6 +109,17 @@ export function Footer() {
               </li>
               <li>
                 <a
+                  href={siteConfig.telegramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors text-sm"
+                >
+                  <TelegramIcon className="w-4 h-4" />
+                  {t('footer.telegram')}
+                </a>
+              </li>
+              <li>
+                <a
                   href={siteConfig.emailMailto}
                   className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors text-sm"
                 >
@@ -159,6 +171,15 @@ export function Footer() {
                   aria-label="WhatsApp"
                 >
                   <MessageCircle className="w-5 h-5" />
+                </a>
+                <a
+                  href={siteConfig.telegramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-cream/10 hover:bg-primary flex items-center justify-center transition-colors"
+                  aria-label="Telegram"
+                >
+                  <TelegramIcon className="w-5 h-5" />
                 </a>
               </div>
             </div>

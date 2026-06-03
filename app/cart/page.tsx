@@ -11,9 +11,9 @@ import { Input } from '@/components/ui/input'
 import { useCart } from '@/lib/cart-context'
 import { useLanguage } from '@/lib/language-context'
 import { PaymentInstructions } from '@/components/checkout/payment-instructions'
+import { TelegramIcon } from '@/components/telegram-icon'
 import { calculateDeliveryTotals } from '@/lib/delivery'
-import { siteConfig } from '@/lib/site-config'
-import { whatsappCustomerUrl } from '@/lib/whatsapp'
+import { siteConfig, telegramOrderUrl, whatsappOrderUrl } from '@/lib/site-config'
 import { OrderSuccessScreen } from '@/components/order-success-screen'
 import { 
   Minus, 
@@ -45,12 +45,16 @@ export default function CartPage() {
   const freeDeliveryThreshold = siteConfig.freeDeliveryThreshold
   const { deliveryFee, total: orderTotal } = calculateDeliveryTotals(totalPrice)
 
-  const handleWhatsAppOrder = () => {
-    const itemsList = items.map(item => 
-      `- ${item.name} x${item.quantity} = ${(item.price * item.quantity).toLocaleString()} ETB`
-    ).join('\n')
-    
-    const message = `*New Order from Yani's Blessings Website*\n\n` +
+  const buildMessagingOrderText = () => {
+    const itemsList = items
+      .map(
+        (item) =>
+          `- ${item.name} x${item.quantity} = ${(item.price * item.quantity).toLocaleString()} ETB`,
+      )
+      .join('\n')
+
+    return (
+      `*New Order from Yani's Blessings Website*\n\n` +
       `*Customer:* ${customerInfo.name}\n` +
       `*Phone:* ${customerInfo.phone}\n` +
       `*Delivery Address:* ${customerInfo.address}\n\n` +
@@ -59,8 +63,18 @@ export default function CartPage() {
       `*Delivery:* ${totalPrice >= freeDeliveryThreshold ? 'FREE' : `${deliveryFee} ETB`}\n` +
       `*Total:* ${orderTotal.toLocaleString()} ETB\n\n` +
       `${customerInfo.notes ? `*Notes:* ${customerInfo.notes}` : ''}`
-    
-    window.open(whatsappCustomerUrl(customerInfo.phone, message), '_blank')
+    )
+  }
+
+  const canMessageOrder =
+    Boolean(customerInfo.name) && Boolean(customerInfo.phone) && Boolean(customerInfo.address)
+
+  const handleWhatsAppOrder = () => {
+    window.open(whatsappOrderUrl(buildMessagingOrderText()), '_blank')
+  }
+
+  const handleTelegramOrder = () => {
+    window.open(telegramOrderUrl(buildMessagingOrderText()), '_blank')
   }
 
   const handlePlaceOrder = async () => {
@@ -105,12 +119,20 @@ export default function CartPage() {
               {t('btn.continueShopping')}
             </Button>
           </Link>
-          <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
-              <MessageCircle className="w-5 h-5 mr-2" />
-              {t('btn.contactUs')}
-            </Button>
-          </a>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center w-full">
+            <a href={siteConfig.whatsappUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
+                <MessageCircle className="w-5 h-5 mr-2" />
+                {t('footer.whatsapp')}
+              </Button>
+            </a>
+            <a href={siteConfig.telegramUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="rounded-full px-8 w-full sm:w-auto">
+                <TelegramIcon className="w-5 h-5 mr-2" />
+                {t('footer.telegram')}
+              </Button>
+            </a>
+          </div>
         </div>
       </OrderSuccessScreen>
     )
@@ -398,12 +420,22 @@ export default function CartPage() {
 
                   <Button
                     onClick={handleWhatsAppOrder}
-                    disabled={!customerInfo.name || !customerInfo.phone || !customerInfo.address}
+                    disabled={!canMessageOrder}
                     variant="outline"
                     className="w-full rounded-full py-6 text-lg font-medium border-2 border-green-500 text-green-600 hover:bg-green-50"
                   >
                     <MessageCircle className="w-5 h-5 mr-2" />
                     {t('btn.orderViaWhatsapp')}
+                  </Button>
+
+                  <Button
+                    onClick={handleTelegramOrder}
+                    disabled={!canMessageOrder}
+                    variant="outline"
+                    className="w-full rounded-full py-6 text-lg font-medium border-2 border-[#0088cc] text-[#0088cc] hover:bg-[#0088cc]/10"
+                  >
+                    <TelegramIcon className="w-5 h-5 mr-2" />
+                    {t('btn.orderViaTelegram')}
                   </Button>
                 </div>
 
