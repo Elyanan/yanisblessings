@@ -25,7 +25,7 @@ type Props = {
 }
 
 export function CustomerContactButtons({ phone, telegram, message }: Props) {
-  const telegramUrl = telegramCustomerUrl(telegram, message)
+  const telegramUrl = telegramCustomerUrl(telegram, phone, message)
   const phoneHref = `tel:${phone.replace(/\s/g, '')}`
 
   return (

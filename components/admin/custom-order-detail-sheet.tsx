@@ -6,6 +6,7 @@ import {
   Calendar,
   Cake,
   MapPin,
+  MessageCircle,
   Pencil,
   Sparkles,
   Trash2,
