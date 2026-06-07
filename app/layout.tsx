@@ -63,7 +63,7 @@ export default async function RootLayout({
             {children}
           </CartProvider>
         </LanguageProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )
