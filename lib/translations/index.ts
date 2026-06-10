@@ -155,7 +155,7 @@ export const translations = {
   'menu.searchProducts': { en: 'Search products...', am: 'ምርቶችን ይፈልጉ...' },
   'product.backToMenu': { en: 'Back to Menu', am: 'ወደ ምናሌ ተመለስ' },
   'product.addToOrder': { en: 'Add to Order', am: 'ወደ ትዕዛዝ ይጨምሩ' },
-  'product.freeDelivery': { en: 'Free delivery on orders over 1,000 ETB', am: 'ከ1,000 ብር በላይ ትዕዛዞች ላይ ነፃ ማድረሻ' },
+  'product.freeDelivery': { en: 'Free delivery on orders over 5,000 ETB', am: 'ከ5,000 ብር በላይ ትዕዛዞች ላይ ነፃ ማድረሻ' },
   'product.freshDaily': { en: 'Freshly prepared daily', am: 'በየቀኑ አዲስ የተዘጋጀ' },
   'product.beautifulPackaging': { en: 'Beautifully packaged', am: 'በቆንጆ ታሽጓል' },
   'about.ourStory': { en: 'Our Story', am: 'ታሪካችን' },
