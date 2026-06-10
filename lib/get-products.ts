@@ -25,10 +25,11 @@ function mapSanityProduct(item: SanityMenuItem): Product {
     category: categorySlug,
     available: item.availability !== false,
     featured: item.featured ?? false,
+    hasGranolaSizes: item.hasGranolaSizes,
     ingredients: item.ingredients,
   }
 
-  if (isGranolaWithSizes({ id: slug, category: categorySlug })) {
+  if (isGranolaWithSizes({ id: slug, category: categorySlug, hasGranolaSizes: item.hasGranolaSizes })) {
     product.sizes = buildGranolaSizes(item.price)
   }
 

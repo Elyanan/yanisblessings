@@ -50,7 +50,11 @@ export function ProductPageClient({ id }: ProductPageClientProps) {
     )
   }
 
-  const hasSizes = isGranolaWithSizes(product)
+  const hasSizes = isGranolaWithSizes({
+    id: product.id,
+    category: product.category,
+    hasGranolaSizes: product.hasGranolaSizes,
+  })
   const lineId = hasSizes ? cartLineId(product.id, selectedSize) : product.id
   const cartItem = items.find((item) => item.id === lineId)
   const quantity = cartItem?.quantity || 0

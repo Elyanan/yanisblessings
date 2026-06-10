@@ -24,8 +24,14 @@ const GRANOLA_FIXED_PORTION_SLUGS = new Set([
   'mini-breakfast-granola-pack',
 ])
 
-export function isGranolaWithSizes(product: { id: string; category: string }): boolean {
+export function isGranolaWithSizes(product: {
+  id: string
+  category: string
+  hasGranolaSizes?: boolean
+}): boolean {
   if (!isGranolaProduct(product.category)) return false
+  if (product.hasGranolaSizes === false) return false
+  if (product.hasGranolaSizes === true) return true
   if (GRANOLA_FIXED_PORTION_SLUGS.has(product.id)) return false
   return true
 }

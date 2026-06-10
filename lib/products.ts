@@ -9,6 +9,7 @@ export interface Product {
   category: string
   available: boolean
   featured?: boolean
+  hasGranolaSizes?: boolean
   ingredients?: string[]
   sizes?: { name: string; price: number }[]
 }

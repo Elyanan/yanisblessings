@@ -13,6 +13,7 @@ export type SanityMenuItem = {
   image?: { asset?: { url?: string } }
   ingredients?: string[]
   category?: { _id: string; title: string; slug?: { current: string } }
+  hasGranolaSizes?: boolean
   featured?: boolean
   availability?: boolean
   sortOrder?: number

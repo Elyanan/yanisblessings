@@ -11,6 +11,10 @@ export function sanitizeMenuItem(doc: Record<string, unknown>) {
   const cleaned: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(rest)) {
+    if (typeof value === 'boolean') {
+      cleaned[key] = value
+      continue
+    }
     if (value === '' || value === undefined || value === null) continue
     cleaned[key] = value
   }
@@ -33,6 +37,10 @@ export function sanitizeCategory(doc: Record<string, unknown>) {
   const cleaned: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(rest)) {
+    if (typeof value === 'boolean') {
+      cleaned[key] = value
+      continue
+    }
     if (value === '' || value === undefined || value === null) continue
     cleaned[key] = value
   }

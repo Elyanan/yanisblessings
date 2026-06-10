@@ -3,7 +3,11 @@ import { auth } from '@/lib/auth'
 import { ORDER_STATUSES } from '@/lib/order-status'
 import { calculateOrderTotals, type OrderLineItem } from '@/lib/order-totals'
 import { deleteDocument, deliverCustomOrder, mutateCategory, mutateMenuItem, mutateOrder, mutateCustomOrder, updateDocumentStatus } from '@/lib/sanity/queries'
+import { formatSanityError } from '@/lib/sanity/retry'
+import { revalidateMenuContent } from '@/lib/sanity/revalidate'
 import type { SanityOrder } from '@/lib/sanity/types'
+
+export const dynamic = 'force-dynamic'
 
 export async function PATCH(request: Request) {
   const session = await auth()
@@ -35,11 +39,13 @@ export async function PATCH(request: Request) {
 
     if (action === 'saveMenuItem' && document) {
       const result = await mutateMenuItem(document)
+      revalidateMenuContent()
       return NextResponse.json({ success: true, result })
     }
 
     if (action === 'saveCategory' && document) {
       const result = await mutateCategory(document)
+      revalidateMenuContent()
       return NextResponse.json({ success: true, result })
     }
 
@@ -108,17 +114,13 @@ export async function PATCH(request: Request) {
 
     if (action === 'delete' && id) {
       await deleteDocument(id)
+      revalidateMenuContent()
       return NextResponse.json({ success: true })
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
     console.error('[admin/api] Mutation failed', error)
-    let message = error instanceof Error ? error.message : 'Mutation failed'
-    if (message.includes('permission "create" required') || message.includes('permission "update" required')) {
-      message =
-        'Your SANITY_API_TOKEN is read-only. At sanity.io/manage → API → Tokens, create a new token with Editor (or Developer) role for project bwoxbrpd, replace SANITY_API_TOKEN in .env.local, and restart the dev server.'
-    }
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: formatSanityError(error) }, { status: 500 })
   }
 }

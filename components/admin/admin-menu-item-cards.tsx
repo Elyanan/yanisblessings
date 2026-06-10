@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { SanityMenuItem } from '@/lib/sanity/types'
+import { isGranolaProduct } from '@/lib/granola-sizes'
 
 type Props = {
   items: SanityMenuItem[]
@@ -41,7 +42,12 @@ export function AdminMenuItemCards({ items, onEdit, onDelete }: Props) {
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {item.featured && (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                    Featured
+                    Best seller
+                  </Badge>
+                )}
+                {isGranolaProduct(item.category?.slug?.current ?? '') && item.hasGranolaSizes !== false && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                    1kg / 0.5kg
                   </Badge>
                 )}
                 {item.availability === false && (

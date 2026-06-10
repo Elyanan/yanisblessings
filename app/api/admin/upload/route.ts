@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getSanityWriteClient } from '@/lib/sanity/client'
+import { formatSanityError, withSanityRetry } from '@/lib/sanity/retry'
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   const session = await auth()
@@ -22,10 +25,14 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const asset = await client.assets.upload('image', buffer, {
-      filename: file.name,
-      contentType: file.type,
-    })
+    const asset = await withSanityRetry(
+      () =>
+        client.assets.upload('image', buffer, {
+          filename: file.name,
+          contentType: file.type,
+        }),
+      'uploadImage',
+    )
 
     return NextResponse.json({
       success: true,
@@ -34,6 +41,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('[upload] Failed', error)
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    return NextResponse.json({ error: formatSanityError(error) }, { status: 500 })
   }
 }

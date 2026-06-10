@@ -1,7 +1,8 @@
-import { getSanityClient, getSanityWriteClient } from './client'
+import { getSanityClient, getSanityFreshClient, getSanityWriteClient } from './client'
 import { calculateCustomOrderTotals, validateDeliveredLineItems } from '@/lib/custom-order-totals'
 import type { SanityCategory, SanityCustomOrder, SanityMenuItem, SanityOrder } from './types'
 import { sanitizeCategory, sanitizeMenuItem } from './sanitize'
+import { withSanityRetry } from './retry'
 
 async function safeSanityFetch<T>(label: string, fallback: T, fetcher: () => Promise<T>): Promise<T> {
   try {
@@ -33,7 +34,7 @@ const emptyDashboardStats = {
 }
 
 export const menuItemsQuery = `*[_type == "menuItem"] | order(sortOrder asc, title asc) {
-  _id, title, titleAm, description, descriptionAm, price, featured, availability, sortOrder,
+  _id, title, titleAm, description, descriptionAm, price, hasGranolaSizes, featured, availability, sortOrder,
   slug, ingredients,
   "image": image { asset-> { url } },
   "category": category->{ _id, title, slug }
@@ -85,6 +86,25 @@ export async function fetchCategories(): Promise<SanityCategory[]> {
   if (!client) return []
   return safeSanityFetch('fetchCategories', [], () =>
     client.fetch(categoriesQuery, {}, { next: { revalidate: 300, tags: ['categories'] } }),
+  )
+}
+
+/** Uncached read for admin — always returns the latest Sanity data. */
+export async function fetchMenuItemsFresh(): Promise<SanityMenuItem[]> {
+  const client = getSanityFreshClient()
+  if (!client) return []
+  return withSanityRetry(
+    () => client.fetch(menuItemsQuery, {}, { cache: 'no-store' }),
+    'fetchMenuItemsFresh',
+  )
+}
+
+export async function fetchCategoriesFresh(): Promise<SanityCategory[]> {
+  const client = getSanityFreshClient()
+  if (!client) return []
+  return withSanityRetry(
+    () => client.fetch(categoriesQuery, {}, { cache: 'no-store' }),
+    'fetchCategoriesFresh',
   )
 }
 
@@ -324,11 +344,12 @@ export async function mutateMenuItem(doc: Record<string, unknown>) {
 
   const { id, data } = sanitizeMenuItem(doc)
 
-  if (id) {
-    return client.patch(id).set(data).commit()
-  }
-
-  return client.create({ _type: 'menuItem', ...data })
+  return withSanityRetry(async () => {
+    if (id) {
+      return client.patch(id).set(data).commit()
+    }
+    return client.create({ _type: 'menuItem', ...data })
+  }, 'mutateMenuItem')
 }
 
 export async function deleteDocument(id: string) {
@@ -336,7 +357,7 @@ export async function deleteDocument(id: string) {
   if (!client) {
     throw new Error('Sanity is not configured.')
   }
-  return client.delete(id)
+  return withSanityRetry(() => client.delete(id), 'deleteDocument')
 }
 
 export async function mutateCategory(doc: Record<string, unknown>) {
@@ -347,9 +368,10 @@ export async function mutateCategory(doc: Record<string, unknown>) {
 
   const { id, data } = sanitizeCategory(doc)
 
-  if (id) {
-    return client.patch(id).set(data).commit()
-  }
-
-  return client.create({ _type: 'category', ...data })
+  return withSanityRetry(async () => {
+    if (id) {
+      return client.patch(id).set(data).commit()
+    }
+    return client.create({ _type: 'category', ...data })
+  }, 'mutateCategory')
 }

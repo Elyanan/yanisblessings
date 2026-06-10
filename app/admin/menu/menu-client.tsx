@@ -16,6 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { SanityMenuItem, SanityCategory } from '@/lib/sanity/types'
+import { isGranolaProduct, isGranolaWithSizes } from '@/lib/granola-sizes'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminMenuItemCards } from '@/components/admin/admin-menu-item-cards'
 import { ResponsiveTableWrap } from '@/components/admin/responsive-table-wrap'
@@ -31,6 +32,7 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Please select a category'),
   ingredients: z.string().optional(),
   sortOrder: z.coerce.number().optional(),
+  hasGranolaSizes: z.boolean().optional(),
   featured: z.boolean().optional(),
   availability: z.boolean().optional(),
 })
@@ -56,19 +58,46 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { featured: false, availability: true, sortOrder: 0, categoryId: '' },
+    defaultValues: {
+      hasGranolaSizes: false,
+      featured: false,
+      availability: true,
+      sortOrder: 0,
+      categoryId: '',
+    },
   })
 
   const editingId = watch('_id')
+  const selectedCategoryId = watch('categoryId')
+  const selectedCategory = useMemo(
+    () => categories.find((cat) => cat._id === selectedCategoryId),
+    [categories, selectedCategoryId],
+  )
+  const isGranolaCategory = isGranolaProduct(selectedCategory?.slug?.current ?? '')
 
   const load = async () => {
-    const [menuRes, catRes] = await Promise.all([
-      fetch('/api/admin/menu', { credentials: 'include' }).then((r) => r.json()),
-      fetch('/api/admin/categories', { credentials: 'include' }).then((r) => r.json()),
-    ])
-    setItems(menuRes.items ?? [])
-    setCategories(catRes.categories ?? [])
-    refreshAdminData(router)
+    try {
+      const fetchOpts: RequestInit = { credentials: 'include', cache: 'no-store' }
+      const [menuRes, catRes] = await Promise.all([
+        fetch('/api/admin/menu', fetchOpts),
+        fetch('/api/admin/categories', fetchOpts),
+      ])
+
+      const menuPayload = await menuRes.json().catch(() => ({}))
+      const catPayload = await catRes.json().catch(() => ({}))
+
+      if (!menuRes.ok || !catRes.ok) {
+        const err = menuPayload.error ?? catPayload.error ?? 'Could not load menu data from Sanity'
+        setMessage(err)
+        return
+      }
+
+      setItems(menuPayload.items ?? [])
+      setCategories(catPayload.categories ?? [])
+      refreshAdminData(router)
+    } catch {
+      setMessage('Network error — could not refresh the menu list. Check your connection and try again.')
+    }
   }
 
   const filteredItems = useMemo(() => {
@@ -98,49 +127,70 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
   const onSubmit = async (data: FormData) => {
     setSaving(true)
     setMessage('')
-    const ingredients = data.ingredients?.split(',').map((s) => s.trim()).filter(Boolean)
-    const { categoryId, ...fields } = data
-    const document: Record<string, unknown> = {
-      ...fields,
-      ingredients,
-      category: { _type: 'reference', _ref: categoryId },
-    }
-    if (imageAssetId) {
-      document.image = {
-        _type: 'image',
-        asset: { _type: 'reference', _ref: imageAssetId },
+    try {
+      const ingredients = data.ingredients?.split(',').map((s) => s.trim()).filter(Boolean)
+      const { categoryId, hasGranolaSizes, ...fields } = data
+      const document: Record<string, unknown> = {
+        ...fields,
+        ingredients,
+        hasGranolaSizes: isGranolaCategory ? hasGranolaSizes === true : false,
+        featured: data.featured === true,
+        availability: data.availability !== false,
+        category: { _type: 'reference', _ref: categoryId },
       }
-    }
-    const res = await fetch('/api/admin', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        action: 'saveMenuItem',
-        document,
-      }),
-    })
-    setSaving(false)
-    const payload = await res.json().catch(() => ({}))
-    if (res.ok) {
-      setMessage('Menu item saved')
-      reset({ featured: false, availability: true, sortOrder: 0, categoryId: '' })
-      setImageAssetId('')
-      setImagePreview('')
-      load()
-    } else {
-      setMessage(payload.error ?? 'Failed to save — check Sanity credentials')
+      if (imageAssetId) {
+        document.image = {
+          _type: 'image',
+          asset: { _type: 'reference', _ref: imageAssetId },
+        }
+      }
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: 'saveMenuItem',
+          document,
+        }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setMessage('Menu item saved')
+        reset({
+          hasGranolaSizes: false,
+          featured: false,
+          availability: true,
+          sortOrder: 0,
+          categoryId: '',
+        })
+        setImageAssetId('')
+        setImagePreview('')
+        await load()
+      } else {
+        setMessage(payload.error ?? 'Failed to save menu item')
+      }
+    } catch {
+      setMessage('Network error — could not reach the server. Check your connection and try again.')
+    } finally {
+      setSaving(false)
     }
   }
 
   const clearForm = () => {
-    reset({ featured: false, availability: true, sortOrder: 0, categoryId: '' })
+    reset({
+      hasGranolaSizes: false,
+      featured: false,
+      availability: true,
+      sortOrder: 0,
+      categoryId: '',
+    })
     setImageAssetId('')
     setImagePreview('')
     setMessage('')
   }
 
   const editItem = (item: SanityMenuItem) => {
+    const categorySlug = item.category?.slug?.current ?? ''
     reset({
       _id: item._id,
       title: item.title,
@@ -151,8 +201,13 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
       categoryId: item.category?._id ?? '',
       ingredients: item.ingredients?.join(', '),
       sortOrder: item.sortOrder,
-      featured: item.featured,
-      availability: item.availability,
+      hasGranolaSizes: isGranolaWithSizes({
+        id: item.slug?.current ?? item._id,
+        category: categorySlug,
+        hasGranolaSizes: item.hasGranolaSizes,
+      }),
+      featured: item.featured ?? false,
+      availability: item.availability !== false,
     })
     setImageAssetId('')
     setImagePreview(item.image?.asset?.url ?? '')
@@ -331,7 +386,15 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
                   <>
                     <Select
                       value={watch('categoryId')}
-                      onValueChange={(value) => setValue('categoryId', value, { shouldValidate: true })}
+                      onValueChange={(value) => {
+                        setValue('categoryId', value, { shouldValidate: true })
+                        const cat = categories.find((c) => c._id === value)
+                        if (isGranolaProduct(cat?.slug?.current ?? '')) {
+                          setValue('hasGranolaSizes', true)
+                        } else {
+                          setValue('hasGranolaSizes', false)
+                        }
+                      }}
                     >
                       <SelectTrigger className="mt-1 w-full">
                         <SelectValue placeholder="Select a category" />
@@ -376,24 +439,44 @@ export function AdminMenuClient({ initialItems, initialCategories }: Props) {
               </div>
 
               <div className="space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3 sm:p-4">
+                {isGranolaCategory && (
+                  <div className="flex items-start gap-3">
+                    <Switch
+                      id="hasGranolaSizes"
+                      checked={watch('hasGranolaSizes') === true}
+                      onCheckedChange={(v) => setValue('hasGranolaSizes', v)}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <Label htmlFor="hasGranolaSizes">1kg / 0.5kg sizes</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Price is per kg — customers can pick 1kg or 0.5kg
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
                   <Switch
-                    checked={watch('featured')}
+                    id="featured"
+                    checked={watch('featured') === true}
                     onCheckedChange={(v) => setValue('featured', v)}
                     className="mt-0.5 shrink-0"
                   />
                   <div className="min-w-0">
-                    <Label>Featured</Label>
-                    <p className="text-xs text-muted-foreground">Show on the home page featured section</p>
+                    <Label htmlFor="featured">Best seller</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Shows a Best Seller badge on the menu and product page
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Switch
-                    checked={watch('availability')}
+                    id="availability"
+                    checked={watch('availability') !== false}
                     onCheckedChange={(v) => setValue('availability', v)}
                     className="shrink-0"
                   />
-                  <Label>Available</Label>
+                  <Label htmlFor="availability">Available</Label>
                 </div>
               </div>
 
