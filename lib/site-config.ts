@@ -1,9 +1,9 @@
 import { deliveryConfig, getDeliveryZone } from '@/lib/delivery'
 import { telegramCustomerUrl } from '@/lib/telegram'
 
-const BUSINESS_PHONE = '+251926773391'
+const BUSINESS_PHONE = '+251988235153'
 const DEFAULT_OWNER_EMAIL = 'contact@yanisblessings.com'
-const DEFAULT_TELEGRAM_URL = 'https://t.me/+251926773391'
+const DEFAULT_TELEGRAM_URL = 'https://t.me/+251988235153'
 
 const defaultZone = getDeliveryZone()
 
@@ -37,10 +37,10 @@ export type SiteConfig = {
 export const siteConfig: SiteConfig = {
   name: "Yani's Blessings",
   phone: BUSINESS_PHONE,
-  phoneDisplay: '+251 926 773 391',
-  phoneTel: 'tel:+251926773391',
-  whatsappNumber: '251926773391',
-  whatsappUrl: 'https://wa.me/251926773391',
+  phoneDisplay: '0988235153',
+  phoneTel: 'tel:+251988235153',
+  whatsappNumber: '251988235153',
+  whatsappUrl: 'https://wa.me/251988235153',
   telegramUrl:
     telegramCustomerUrl(
       process.env.NEXT_PUBLIC_TELEGRAM_USERNAME ?? null,
