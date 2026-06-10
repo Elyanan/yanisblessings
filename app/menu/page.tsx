@@ -30,7 +30,7 @@ export default function MenuPage() {
   }, [selectedCategory, searchQuery, language, products])
 
   return (
-    <main className="min-h-screen bg-background">
+    <main id="main-content" className="min-h-screen bg-background">
       <Navbar />
       
       <section className="pt-24 pb-12 md:pt-32 md:pb-16 bg-beige">

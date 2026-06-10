@@ -21,7 +21,7 @@ export default function HomePage() {
   return (
     <>
       <JsonLdScript data={buildLocalBusinessSchema()} id="home-jsonld" />
-      <main className="min-h-screen">
+      <main id="main-content" className="min-h-screen">
         <Navbar />
         <HeroSection />
         <CategoriesSection />

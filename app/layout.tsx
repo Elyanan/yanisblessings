@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   applicationName: "Yani's Blessings",
   creator: "Yani's Blessings",
   publisher: "Yani's Blessings",
+  other: {
+    'content-language': 'en, am',
+  },
   formatDetection: {
     telephone: true,
     email: true,

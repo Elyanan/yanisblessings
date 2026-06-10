@@ -40,7 +40,7 @@ export function ProductPageClient({ id }: ProductPageClientProps) {
 
   if (!product) {
     return (
-      <main className="min-h-screen bg-background">
+      <main id="main-content" className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-32 text-center text-muted-foreground" role="status" aria-live="polite">
           {t('common.loading')}
@@ -87,7 +87,7 @@ export function ProductPageClient({ id }: ProductPageClientProps) {
     .slice(0, 4)
 
   return (
-    <main className="min-h-screen bg-background">
+    <main id="main-content" className="min-h-screen bg-background">
       <Navbar />
 
       <div className="pt-24 md:pt-28 pb-16">

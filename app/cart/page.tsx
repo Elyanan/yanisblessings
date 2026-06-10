@@ -142,7 +142,7 @@ export default function CartPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 pt-32 md:pt-40 pb-20 mt-8">
+        <main id="main-content" className="flex-1 flex flex-col items-center justify-center px-4 pt-32 md:pt-40 pb-20 mt-8">
           <div className="max-w-md w-full text-center">
             <div className="relative mx-auto mb-8 h-28 w-28 sm:h-32 sm:w-32">
               <Image
@@ -174,7 +174,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div id="main-content" className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero */}

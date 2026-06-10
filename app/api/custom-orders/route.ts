@@ -2,25 +2,35 @@ import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { sendCustomOrderEmail } from '@/lib/email/order-emails'
 import { createCustomOrderDocument } from '@/lib/sanity/queries'
+import { rejectIfBadOrigin } from '@/lib/security/public-api'
+import {
+  customerNameField,
+  emailField,
+  phoneField,
+  shortTextField,
+} from '@/lib/security/validation'
 
 const customOrderSchema = z.object({
-  customerName: z.string().min(1),
-  phone: z.string().min(1),
-  email: z.string().email().optional().or(z.literal('')),
-  productType: z.string().min(1),
-  quantity: z.string().optional(),
-  preferredDate: z.string().optional(),
-  deliveryOption: z.string().optional(),
-  deliveryArea: z.string().optional(),
-  customMessage: z.string().optional(),
-  flavorPreference: z.string().optional(),
-  budgetRange: z.string().optional(),
-  specialNotes: z.string().optional(),
-  attachmentAssetId: z.string().optional(),
-  attachmentUrl: z.string().optional(),
+  customerName: customerNameField,
+  phone: phoneField,
+  email: emailField,
+  productType: z.string().trim().min(1).max(200),
+  quantity: shortTextField,
+  preferredDate: shortTextField,
+  deliveryOption: shortTextField,
+  deliveryArea: shortTextField,
+  customMessage: z.string().trim().max(2000).optional(),
+  flavorPreference: shortTextField,
+  budgetRange: shortTextField,
+  specialNotes: z.string().trim().max(2000).optional(),
+  attachmentAssetId: z.string().trim().max(100).optional(),
+  attachmentUrl: z.string().url().max(500).optional(),
 })
 
 export async function POST(request: Request) {
+  const originError = rejectIfBadOrigin(request)
+  if (originError) return originError
+
   try {
     const body = await request.json()
     const parsed = customOrderSchema.safeParse(body)

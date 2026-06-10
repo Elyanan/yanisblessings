@@ -1,16 +1,27 @@
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { sendContactEmail } from '@/lib/email/order-emails'
+import { rejectIfBadOrigin } from '@/lib/security/public-api'
+import {
+  customerNameField,
+  emailField,
+  messageField,
+  phoneField,
+  subjectField,
+} from '@/lib/security/validation'
 
 const contactSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().min(1),
-  subject: z.string().min(1),
-  message: z.string().min(1),
+  name: customerNameField,
+  email: emailField,
+  phone: phoneField,
+  subject: subjectField,
+  message: messageField,
 })
 
 export async function POST(request: Request) {
+  const originError = rejectIfBadOrigin(request)
+  if (originError) return originError
+
   try {
     const body = await request.json()
     const parsed = contactSchema.safeParse(body)

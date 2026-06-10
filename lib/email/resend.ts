@@ -66,6 +66,8 @@ export async function sendEmail({
     throw new Error(`${error.message}${hint}`)
   }
 
-  console.info('[email] Resend sent', { subject, to: recipients, id: data?.id })
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[email] Resend sent', { subject, to: recipients, id: data?.id })
+  }
   return { success: true as const, id: data?.id }
 }

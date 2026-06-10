@@ -3,21 +3,32 @@ import { NextResponse } from 'next/server'
 import { sendRegularOrderEmail } from '@/lib/email/order-emails'
 import { createOrderDocument } from '@/lib/sanity/queries'
 import { calculateDeliveryTotals } from '@/lib/delivery'
+import { rejectIfBadOrigin } from '@/lib/security/public-api'
+import {
+  addressField,
+  customerNameField,
+  emailField,
+  notesField,
+  phoneField,
+} from '@/lib/security/validation'
 
 const orderSchema = z.object({
-  customerName: z.string().min(1),
-  phone: z.string().min(1),
-  email: z.string().email().optional().or(z.literal('')),
-  address: z.string().min(1),
-  notes: z.string().optional(),
+  customerName: customerNameField,
+  phone: phoneField,
+  email: emailField,
+  address: addressField,
+  notes: notesField,
   items: z.array(z.object({
-    name: z.string(),
-    quantity: z.number().min(1),
-    price: z.number().min(0),
-  })).min(1),
+    name: z.string().trim().min(1).max(200),
+    quantity: z.number().int().min(1).max(99),
+    price: z.number().min(0).max(1_000_000),
+  })).min(1).max(50),
 })
 
 export async function POST(request: Request) {
+  const originError = rejectIfBadOrigin(request)
+  if (originError) return originError
+
   try {
     const body = await request.json()
     const parsed = orderSchema.safeParse(body)

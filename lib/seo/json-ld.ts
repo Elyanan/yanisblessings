@@ -20,6 +20,14 @@ export function buildOrganizationSchema() {
     logo: absoluteUrl('/logo.png'),
     email: siteConfig.email,
     telephone: siteConfig.phone,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: siteConfig.phone,
+      email: siteConfig.email,
+      contactType: 'customer service',
+      areaServed: 'ET',
+      availableLanguage: ['English', 'Amharic'],
+    },
     sameAs: [siteConfig.social.instagram, siteConfig.social.tiktok],
     address,
   }
@@ -112,6 +120,7 @@ export function buildProductSchema(product: Product) {
     image: product.image.startsWith('http') ? product.image : absoluteUrl(product.image),
     url,
     sku: product.id,
+    inLanguage: ['en', 'am'],
     brand: {
       '@type': 'Brand',
       name: SITE_NAME,

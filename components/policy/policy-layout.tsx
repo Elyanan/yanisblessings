@@ -31,7 +31,7 @@ export function PolicyLayout({ title, description, children, jsonLd }: Props) {
       ))}
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           <div className="bg-gradient-to-b from-beige/80 to-background border-b border-border">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-28 md:pt-32 pb-10">
               <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground mb-4">
