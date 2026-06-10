@@ -18,7 +18,7 @@ import {
   formatItemNameWithSize,
   getGranolaPrice,
   getGranolaSizeOption,
-  isGranolaProduct,
+  isGranolaWithSizes,
   type GranolaSizeKey,
 } from '@/lib/granola-sizes'
 
@@ -50,7 +50,7 @@ export function ProductPageClient({ id }: ProductPageClientProps) {
     )
   }
 
-  const hasSizes = isGranolaProduct(product.category)
+  const hasSizes = isGranolaWithSizes(product)
   const lineId = hasSizes ? cartLineId(product.id, selectedSize) : product.id
   const cartItem = items.find((item) => item.id === lineId)
   const quantity = cartItem?.quantity || 0

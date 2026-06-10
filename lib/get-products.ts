@@ -1,5 +1,5 @@
 import type { Product } from '@/lib/products'
-import { buildGranolaSizes, isGranolaProduct } from '@/lib/granola-sizes'
+import { buildGranolaSizes, isGranolaWithSizes } from '@/lib/granola-sizes'
 import { optimizeSanityCdnUrl } from '@/lib/sanity/image'
 import { fetchCategories, fetchMenuItems } from '@/lib/sanity/queries'
 import type { SanityCategory, SanityMenuItem } from '@/lib/sanity/types'
@@ -28,7 +28,7 @@ function mapSanityProduct(item: SanityMenuItem): Product {
     ingredients: item.ingredients,
   }
 
-  if (isGranolaProduct(categorySlug)) {
+  if (isGranolaWithSizes({ id: slug, category: categorySlug })) {
     product.sizes = buildGranolaSizes(item.price)
   }
 

@@ -12,7 +12,7 @@ import {
   formatItemNameWithSize,
   getGranolaPrice,
   getGranolaSizeOption,
-  isGranolaProduct,
+  isGranolaWithSizes,
   type GranolaSizeKey,
 } from '@/lib/granola-sizes'
 import type { Product } from '@/lib/products'
@@ -26,7 +26,7 @@ interface ProductCardProps {
 export function ProductCard({ product, showDescription = true }: ProductCardProps) {
   const { addItem, items, updateQuantity } = useCart()
   const { language, t } = useLanguage()
-  const hasSizes = isGranolaProduct(product.category)
+  const hasSizes = isGranolaWithSizes(product)
   const [selectedSize, setSelectedSize] = useState<GranolaSizeKey>('1kg')
 
   const lineId = hasSizes ? cartLineId(product.id, selectedSize) : product.id

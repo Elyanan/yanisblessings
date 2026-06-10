@@ -18,6 +18,18 @@ export function isGranolaProduct(category: string): boolean {
   return category.toLowerCase().includes(GRANOLA_CATEGORY_SLUG)
 }
 
+/** Granola items sold as a fixed single portion (no 1kg / 0.5kg selector). */
+const GRANOLA_FIXED_PORTION_SLUGS = new Set([
+  'granola-mini-pack',
+  'mini-breakfast-granola-pack',
+])
+
+export function isGranolaWithSizes(product: { id: string; category: string }): boolean {
+  if (!isGranolaProduct(product.category)) return false
+  if (GRANOLA_FIXED_PORTION_SLUGS.has(product.id)) return false
+  return true
+}
+
 export function getGranolaSizeOption(key: GranolaSizeKey): GranolaSizeOption {
   return GRANOLA_SIZES.find((s) => s.key === key) ?? GRANOLA_SIZES[0]
 }
