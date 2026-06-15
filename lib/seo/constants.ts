@@ -1,6 +1,6 @@
 import { siteConfig } from '@/lib/site-config'
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://yanisblessings.com'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.yanisblessings.com'
 
 export const SITE_NAME = siteConfig.name
 
