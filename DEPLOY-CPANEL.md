@@ -65,7 +65,7 @@ Set at least:
 |----------|---------|
 | `NODE_ENV` | `production` |
 | `PORT` | (cPanel often sets this automatically) |
-| `NEXT_PUBLIC_SITE_URL` | `https://www.yourdomain.com` (must match the URL visitors use, including `www` if you redirect there) |
+| `NEXT_PUBLIC_SITE_URL` | `https://yourdomain.com` |
 | `AUTH_SECRET` | random 32+ char secret |
 | `AUTH_URL` | `https://yourdomain.com` |
 | `ADMIN_USERNAME` | your admin user |

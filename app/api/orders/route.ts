@@ -21,7 +21,7 @@ const orderSchema = z.object({
   items: z.array(z.object({
     name: z.string().trim().min(1).max(200),
     quantity: z.number().int().min(1).max(99),
-    price: z.number().min(0).max(1_000_000),
+    price: z.coerce.number().min(0).max(1_000_000),
   })).min(1).max(50),
 })
 

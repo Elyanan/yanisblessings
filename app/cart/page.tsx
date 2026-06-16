@@ -93,11 +93,15 @@ export default function CartPage() {
           items: items.map((item) => ({
             name: item.name,
             quantity: item.quantity,
-            price: item.price,
+            price: Number(item.price),
           })),
         }),
       })
-      if (!res.ok) throw new Error('Order failed')
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}))
+        console.error('[cart] Order failed', res.status, payload)
+        throw new Error('Order failed')
+      }
       setOrderPlaced(true)
       clearCart()
     } catch {
