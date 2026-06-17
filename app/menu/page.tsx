@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search, Filter, X } from 'lucide-react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -16,6 +16,14 @@ export default function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    const categoryParam = new URLSearchParams(window.location.search).get('category')
+    if (!categoryParam) return
+    if (categories.some((category) => category.id === categoryParam)) {
+      setSelectedCategory(categoryParam)
+    }
+  }, [categories])
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
