@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useLanguage } from '@/lib/language-context'
 import { siteConfig } from '@/lib/site-config'
+import { useWebsiteImage } from '@/lib/website-images/context'
 import { OrderSuccessScreen } from '@/components/order-success-screen'
 
 const productTypes = [
@@ -28,6 +29,7 @@ const budgetRanges = [
 
 export default function CustomOrdersPage() {
   const { t, language } = useLanguage()
+  const hero = useWebsiteImage('custom-orders-hero')
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -177,10 +179,11 @@ export default function CustomOrdersPage() {
             </div>
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl hidden lg:block">
               <Image
-                src="/images/box-custom.png"
-                alt="Custom bakery orders"
+                src={hero.src}
+                alt={hero.alt}
                 fill
                 className="object-cover"
+                sizes="(max-width: 1024px) 50vw, 512px"
               />
             </div>
           </div>

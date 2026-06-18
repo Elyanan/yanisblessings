@@ -148,4 +148,31 @@ export const customOrder = defineType({
   ],
 })
 
-export const schemaTypes = [category, menuItem, order, customOrder]
+export const websiteImages = defineType({
+  name: 'websiteImages',
+  title: 'Website Images',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'slots',
+      title: 'Image slots',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'websiteImageSlot',
+          fields: [
+            defineField({ name: 'key', title: 'Key', type: 'string' }),
+            defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
+            defineField({ name: 'image', title: 'Image', type: 'image' }),
+          ],
+          preview: {
+            select: { title: 'key', media: 'image' },
+          },
+        },
+      ],
+    }),
+  ],
+})
+
+export const schemaTypes = [category, menuItem, order, customOrder, websiteImages]

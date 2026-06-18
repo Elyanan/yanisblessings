@@ -6,10 +6,12 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/lib/language-context'
+import { useWebsiteImage } from '@/lib/website-images/context'
 import { Heart, Wheat, Sparkles, Star, Gift, ArrowRight } from 'lucide-react'
 
 export default function AboutPage() {
   const { t } = useLanguage()
+  const story = useWebsiteImage('story-bakery')
 
   const values = [
     { icon: Heart, title: t('about.valueLove'), description: t('about.valueLoveDesc') },
@@ -52,8 +54,8 @@ export default function AboutPage() {
             <div className="relative">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/story-bakery.png"
-                  alt="Yani's Blessings bakery"
+                  src={story.src}
+                  alt={story.alt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"

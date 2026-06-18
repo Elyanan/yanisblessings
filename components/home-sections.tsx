@@ -10,6 +10,8 @@ import { testimonials } from '@/lib/products'
 import { ProductCard } from '@/components/product-card'
 import { siteConfig } from '@/lib/site-config'
 import { useProducts } from '@/lib/use-products'
+import { useWebsiteImage, useWebsiteImages } from '@/lib/website-images/context'
+import { CATEGORY_IMAGE_KEYS } from '@/lib/website-images/definitions'
 
 // Decorative Sparkle Component
 function Sparkle({ className, style }: { className?: string; style?: CSSProperties }) {
@@ -22,6 +24,7 @@ function Sparkle({ className, style }: { className?: string; style?: CSSProperti
 
 export function HeroSection() {
   const { t } = useLanguage()
+  const hero = useWebsiteImage('home-hero')
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
@@ -85,8 +88,8 @@ export function HeroSection() {
               {/* Main Image Container */}
               <div className="absolute inset-4 md:inset-8 rounded-full bg-gradient-to-br from-primary/30 via-beige to-secondary overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/hero-granola.png"
-                  alt="Delicious homemade granola"
+                  src={hero.src}
+                  alt={hero.alt}
                   fill
                   className="object-cover"
                   priority
@@ -139,34 +142,39 @@ export function HeroSection() {
 
 export function CategoriesSection() {
   const { t, language } = useLanguage()
+  const images = useWebsiteImages()
 
   const categories = [
     {
       id: 'granola',
       name: t('cat.granola'),
       description: t('home.catGranolaDesc'),
-      image: '/images/cat-granola.png',
+      image: images[CATEGORY_IMAGE_KEYS.granola].src,
+      imageAlt: images[CATEGORY_IMAGE_KEYS.granola].alt,
       icon: Wheat,
     },
     {
       id: 'cupcakes',
       name: t('cat.cupcakes'),
       description: language === 'en' ? 'Sweet treats for every occasion' : 'ለእያንዳንዱ አጋጣሚ ጣፋጥ ጣፋጮች',
-      image: '/images/cat-cupcakes.png',
+      image: images[CATEGORY_IMAGE_KEYS.cupcakes].src,
+      imageAlt: images[CATEGORY_IMAGE_KEYS.cupcakes].alt,
       icon: Cake,
     },
     {
       id: 'cookies',
       name: t('cat.cookies'),
       description: language === 'en' ? 'Homemade with love' : 'በፍቅር የተሰራ',
-      image: '/images/cat-cookies.png',
+      image: images[CATEGORY_IMAGE_KEYS.cookies].src,
+      imageAlt: images[CATEGORY_IMAGE_KEYS.cookies].alt,
       icon: Cookie,
     },
     {
       id: 'gift-boxes',
       name: t('cat.giftBoxes'),
       description: language === 'en' ? 'Perfect for gifting' : 'ለስጦታ ፍፁም',
-      image: '/images/cat-giftbox.png',
+      image: images[CATEGORY_IMAGE_KEYS['gift-boxes']].src,
+      imageAlt: images[CATEGORY_IMAGE_KEYS['gift-boxes']].alt,
       icon: Gift,
     },
   ]
@@ -210,7 +218,7 @@ export function CategoriesSection() {
             >
               <Image
                 src={category.image}
-                alt={category.name}
+                alt={category.imageAlt}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-700"
                 sizes="(max-width: 640px) 50vw, 25vw"
@@ -394,6 +402,7 @@ export function BestSellersSection() {
 
 export function StorySection() {
   const { t, language } = useLanguage()
+  const story = useWebsiteImage('story-bakery')
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -403,8 +412,8 @@ export function StorySection() {
           <div className="relative order-2 lg:order-1">
             <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-xl">
               <Image
-                src="/images/story-bakery.png"
-                alt="Yani's Blessings bakery"
+                src={story.src}
+                alt={story.alt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -451,6 +460,7 @@ export function StorySection() {
 
 export function GiftBoxesSection() {
   const { t, language } = useLanguage()
+  const giftBoxes = useWebsiteImage('home-gift-boxes')
 
   const giftTypes = [
     { name: language === 'en' ? 'Birthday Boxes' : 'የልደት ሳጥኖች', icon: Cake },
@@ -498,8 +508,8 @@ export function GiftBoxesSection() {
           <div className="relative">
             <div className="aspect-square rounded-3xl overflow-hidden shadow-xl">
               <Image
-                src="/images/gift-boxes-display.png"
-                alt="Yani's Blessings gift boxes"
+                src={giftBoxes.src}
+                alt={giftBoxes.alt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"

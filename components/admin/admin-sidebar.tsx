@@ -10,6 +10,7 @@ import {
   Sparkles,
   UtensilsCrossed,
   Tags,
+  Image as ImageIcon,
   LogOut,
   ExternalLink,
 } from 'lucide-react'
@@ -23,6 +24,7 @@ const links = [
   { href: '/admin/custom-orders', label: 'Custom Orders', icon: Sparkles },
   { href: '/admin/menu', label: 'Menu Items', icon: UtensilsCrossed },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
+  { href: '/admin/website-images', label: 'Website Images', icon: ImageIcon },
   { href: '/admin/studio', label: 'Sanity Studio', icon: ExternalLink },
 ]
 

@@ -1,8 +1,11 @@
+import { unstable_cache } from 'next/cache'
 import { getSanityClient, getSanityFreshClient, getSanityWriteClient } from './client'
+import { withSanityRetry } from './retry'
 import { calculateCustomOrderTotals, validateDeliveredLineItems } from '@/lib/custom-order-totals'
 import type { SanityCategory, SanityCustomOrder, SanityMenuItem, SanityOrder } from './types'
 import { sanitizeCategory, sanitizeMenuItem } from './sanitize'
-import { withSanityRetry } from './retry'
+import { WEBSITE_IMAGES_DOC_ID } from '@/lib/website-images/definitions'
+import type { SanityWebsiteImageSlot } from '@/lib/website-images/types'
 
 async function safeSanityFetch<T>(label: string, fallback: T, fetcher: () => Promise<T>): Promise<T> {
   try {
@@ -374,4 +377,100 @@ export async function mutateCategory(doc: Record<string, unknown>) {
     }
     return client.create({ _type: 'category', ...data })
   }, 'mutateCategory')
+}
+
+const websiteImagesQuery = `*[_type == "websiteImages" && _id == $id][0]{
+  slots[]{
+    key,
+    alt,
+    "assetId": image.asset._ref,
+    "url": image.asset->url
+  }
+}`
+
+/** Always reads from the Sanity API (not CDN) so new uploads are visible immediately. */
+async function loadWebsiteImageSlots(): Promise<SanityWebsiteImageSlot[]> {
+  const client = getSanityFreshClient()
+  if (!client) return []
+
+  return withSanityRetry(async () => {
+    const doc = await client.fetch<{ slots?: SanityWebsiteImageSlot[] } | null>(
+      websiteImagesQuery,
+      { id: WEBSITE_IMAGES_DOC_ID },
+    )
+    return doc?.slots ?? []
+  }, 'loadWebsiteImageSlots')
+}
+
+/** Cached storefront read — invalidated via revalidateTag('website-images'). */
+export const fetchWebsiteImages = unstable_cache(
+  loadWebsiteImageSlots,
+  ['website-images-doc'],
+  { tags: ['website-images'] },
+)
+
+/** Uncached read for admin UI right after edits. */
+export async function fetchWebsiteImagesFresh(): Promise<SanityWebsiteImageSlot[]> {
+  return loadWebsiteImageSlots()
+}
+
+export async function saveWebsiteImageSlot(payload: {
+  key: string
+  alt?: string
+  imageAssetId?: string
+  clearImage?: boolean
+}) {
+  const client = getSanityWriteClient()
+  if (!client) {
+    throw new Error('Sanity is not configured. Add SANITY_API_TOKEN with Editor permissions.')
+  }
+
+  return withSanityRetry(async () => {
+    type WritableSlot = {
+      key: string
+      alt?: string
+      image?: {
+        _type: 'image'
+        asset: { _type: 'reference'; _ref: string }
+      }
+    }
+
+    const doc = await client.fetch<{ slots?: WritableSlot[] } | null>(
+      `*[_id == $id][0]{ slots }`,
+      { id: WEBSITE_IMAGES_DOC_ID },
+    )
+
+    const slots: WritableSlot[] = [...(doc?.slots ?? [])]
+    const index = slots.findIndex((slot) => slot.key === payload.key)
+    const existing: WritableSlot = index >= 0 ? { ...slots[index] } : { key: payload.key }
+
+    if (payload.alt !== undefined) {
+      existing.alt = payload.alt
+    }
+
+    if (payload.clearImage) {
+      delete existing.image
+    } else if (payload.imageAssetId) {
+      existing.image = {
+        _type: 'image',
+        asset: { _type: 'reference', _ref: payload.imageAssetId },
+      }
+    }
+
+    if (index >= 0) {
+      slots[index] = existing
+    } else {
+      slots.push(existing)
+    }
+
+    if (!doc) {
+      return client.create({
+        _id: WEBSITE_IMAGES_DOC_ID,
+        _type: 'websiteImages',
+        slots,
+      })
+    }
+
+    return client.patch(WEBSITE_IMAGES_DOC_ID).set({ slots }).commit()
+  }, 'saveWebsiteImageSlot')
 }

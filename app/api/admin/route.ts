@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { ORDER_STATUSES } from '@/lib/order-status'
 import { calculateOrderTotals, type OrderLineItem } from '@/lib/order-totals'
-import { deleteDocument, deliverCustomOrder, mutateCategory, mutateMenuItem, mutateOrder, mutateCustomOrder, updateDocumentStatus } from '@/lib/sanity/queries'
+import { deleteDocument, deliverCustomOrder, mutateCategory, mutateMenuItem, mutateOrder, mutateCustomOrder, saveWebsiteImageSlot, updateDocumentStatus } from '@/lib/sanity/queries'
 import { formatSanityError } from '@/lib/sanity/retry'
-import { revalidateMenuContent } from '@/lib/sanity/revalidate'
+import { revalidateMenuContent, revalidateWebsiteImages } from '@/lib/sanity/revalidate'
 import type { SanityOrder } from '@/lib/sanity/types'
 
 export const dynamic = 'force-dynamic'
@@ -46,6 +46,17 @@ export async function PATCH(request: Request) {
     if (action === 'saveCategory' && document) {
       const result = await mutateCategory(document)
       revalidateMenuContent()
+      return NextResponse.json({ success: true, result })
+    }
+
+    if (action === 'saveWebsiteImage' && document?.key) {
+      const result = await saveWebsiteImageSlot({
+        key: document.key as string,
+        alt: typeof document.alt === 'string' ? document.alt : undefined,
+        imageAssetId: typeof document.imageAssetId === 'string' ? document.imageAssetId : undefined,
+        clearImage: document.clearImage === true,
+      })
+      revalidateWebsiteImages()
       return NextResponse.json({ success: true, result })
     }
 
