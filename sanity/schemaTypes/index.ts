@@ -11,6 +11,13 @@ export const category = defineType({
     defineField({ name: 'description', title: 'Description', type: 'text' }),
     defineField({ name: 'descriptionAm', title: 'Description (Amharic)', type: 'text' }),
     defineField({ name: 'image', title: 'Image', type: 'image' }),
+    defineField({
+      name: 'showOnHome',
+      title: 'Show on home page',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Turn off to hide this category from the home page categories section.',
+    }),
     defineField({ name: 'sortOrder', title: 'Sort Order', type: 'number', initialValue: 0 }),
   ],
   orderings: [{ title: 'Sort Order', name: 'sortOrderAsc', by: [{ field: 'sortOrder', direction: 'asc' }] }],

@@ -2,15 +2,22 @@
 
 import { Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import type { SanityCategory } from '@/lib/sanity/types'
 
 type Props = {
   categories: SanityCategory[]
   onEdit: (cat: SanityCategory) => void
   onDelete: (id: string) => void
+  onToggleHomeVisibility: (cat: SanityCategory, showOnHome: boolean) => void
 }
 
-export function AdminCategoryCards({ categories, onEdit, onDelete }: Props) {
+export function AdminCategoryCards({
+  categories,
+  onEdit,
+  onDelete,
+  onToggleHomeVisibility,
+}: Props) {
   return (
     <ul className="space-y-3 md:hidden">
       {categories.map((cat) => (
@@ -24,6 +31,16 @@ export function AdminCategoryCards({ categories, onEdit, onDelete }: Props) {
               <p className="text-sm text-muted-foreground truncate">{cat.titleAm}</p>
             )}
             <p className="text-xs text-muted-foreground mt-1">Sort order: {cat.sortOrder ?? 0}</p>
+            <div className="mt-2 flex items-center gap-2">
+              <Switch
+                checked={cat.showOnHome !== false}
+                onCheckedChange={(checked) => onToggleHomeVisibility(cat, checked)}
+                aria-label={`${cat.showOnHome === false ? 'Show' : 'Hide'} ${cat.title} on home page`}
+              />
+              <span className="text-xs text-muted-foreground">
+                {cat.showOnHome === false ? 'Hidden from home' : 'Shown on home'}
+              </span>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Button

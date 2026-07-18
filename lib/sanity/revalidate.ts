@@ -4,8 +4,10 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 export function revalidateMenuContent() {
   revalidateTag('menu-items', 'max')
   revalidateTag('categories', 'max')
+  revalidatePath('/')
   revalidatePath('/menu')
   revalidatePath('/admin/menu')
+  revalidatePath('/admin/categories')
 }
 
 /** Bust cached website images on the storefront after admin edits. */

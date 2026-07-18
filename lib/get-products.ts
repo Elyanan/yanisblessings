@@ -10,6 +10,13 @@ export type CategoryFilter = {
   nameAm: string
 }
 
+export type HomeCategory = CategoryFilter & {
+  description: string
+  descriptionAm: string
+  image?: string
+  imageAlt: string
+}
+
 function mapSanityProduct(item: SanityMenuItem): Product {
   const slug = item.slug?.current ?? item._id
   const categorySlug = item.category?.slug?.current ?? 'uncategorized'
@@ -45,6 +52,20 @@ function mapSanityCategories(cats: SanityCategory[]): CategoryFilter[] {
   return [{ id: 'all', name: 'All', nameAm: 'ሁሉም' }, ...mapped]
 }
 
+function mapHomeCategories(cats: SanityCategory[]): HomeCategory[] {
+  return cats
+    .filter((cat) => cat.showOnHome !== false)
+    .map((cat) => ({
+      id: cat.slug?.current ?? cat._id,
+      name: cat.title,
+      nameAm: cat.titleAm ?? cat.title,
+      description: cat.description ?? '',
+      descriptionAm: cat.descriptionAm ?? cat.description ?? '',
+      image: optimizeSanityCdnUrl(cat.image?.asset?.url, 900, 82),
+      imageAlt: cat.title,
+    }))
+}
+
 export async function getProducts(): Promise<Product[]> {
   const sanityItems = await fetchMenuItems()
   return sanityItems.map(mapSanityProduct)
@@ -61,4 +82,10 @@ export async function getCategories(): Promise<CategoryFilter[]> {
     return [{ id: 'all', name: 'All', nameAm: 'ሁሉም' }]
   }
   return mapSanityCategories(sanityCats)
+}
+
+export async function getHomeCategories(): Promise<HomeCategory[] | undefined> {
+  const sanityCats = await fetchCategories()
+  if (sanityCats.length === 0) return undefined
+  return mapHomeCategories(sanityCats)
 }

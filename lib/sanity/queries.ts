@@ -44,7 +44,7 @@ export const menuItemsQuery = `*[_type == "menuItem"] | order(sortOrder asc, tit
 }`
 
 export const categoriesQuery = `*[_type == "category"] | order(sortOrder asc, title asc) {
-  _id, title, titleAm, description, descriptionAm, sortOrder, slug,
+  _id, title, titleAm, description, descriptionAm, showOnHome, sortOrder, slug,
   "image": image { asset-> { url } }
 }`
 

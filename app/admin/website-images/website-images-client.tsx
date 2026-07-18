@@ -18,6 +18,13 @@ import {
 import { resolveWebsiteImages } from '@/lib/website-images/resolve'
 import type { SanityWebsiteImageSlot } from '@/lib/website-images/types'
 
+const CATEGORY_IMAGE_KEYS = new Set([
+  'home-cat-granola',
+  'home-cat-cupcakes',
+  'home-cat-cookies',
+  'home-cat-giftbox',
+])
+
 type SlotState = {
   alt: string
   previewUrl: string
@@ -175,6 +182,7 @@ export function AdminWebsiteImagesClient({ initialSlots }: Props) {
     return pages.map((page) => ({
       page,
       slots: WEBSITE_IMAGE_SLOTS.filter((slot) => {
+        if (CATEGORY_IMAGE_KEYS.has(slot.key)) return false
         if (page === 'Home') return slot.page === 'Home' && slot.key !== 'story-bakery'
         if (page === 'About') return slot.key === 'story-bakery'
         return slot.page === page

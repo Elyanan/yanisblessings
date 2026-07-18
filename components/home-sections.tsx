@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/lib/language-context'
 import { testimonials } from '@/lib/products'
 import { ProductCard } from '@/components/product-card'
+import type { HomeCategory } from '@/lib/get-products'
 import { siteConfig } from '@/lib/site-config'
 import { useProducts } from '@/lib/use-products'
 import { useWebsiteImage, useWebsiteImages } from '@/lib/website-images/context'
@@ -140,11 +141,11 @@ export function HeroSection() {
   )
 }
 
-export function CategoriesSection() {
+export function CategoriesSection({ categories: editableCategories }: { categories?: HomeCategory[] }) {
   const { t, language } = useLanguage()
   const images = useWebsiteImages()
 
-  const categories = [
+  const fallbackCategories = [
     {
       id: 'granola',
       name: t('cat.granola'),
@@ -179,6 +180,41 @@ export function CategoriesSection() {
     },
   ]
 
+  const categoryIconMap = {
+    granola: Wheat,
+    cupcakes: Cake,
+    cookies: Cookie,
+    'gift-boxes': Gift,
+  } as const
+
+  const categoryImageFallbacks = {
+    granola: images[CATEGORY_IMAGE_KEYS.granola],
+    cupcakes: images[CATEGORY_IMAGE_KEYS.cupcakes],
+    cookies: images[CATEGORY_IMAGE_KEYS.cookies],
+    'gift-boxes': images[CATEGORY_IMAGE_KEYS['gift-boxes']],
+  } as const
+
+  const dynamicCategories = (editableCategories ?? []).map((category) => {
+    const fallbackImage = categoryImageFallbacks[category.id as keyof typeof categoryImageFallbacks]
+    return {
+      id: category.id,
+      name: language === 'am' ? category.nameAm : category.name,
+      description:
+        language === 'am'
+          ? category.descriptionAm || category.description || category.nameAm
+          : category.description || category.descriptionAm || 'Shop this collection',
+      image: category.image || fallbackImage?.src || '/placeholder.svg',
+      imageAlt: category.imageAlt || fallbackImage?.alt || category.name,
+      icon: categoryIconMap[category.id as keyof typeof categoryIconMap] ?? Sparkles,
+    }
+  })
+
+  const categories = editableCategories ? dynamicCategories : fallbackCategories
+
+  if (editableCategories && categories.length === 0) {
+    return null
+  }
+
   return (
     <section className="py-20 md:py-32 bg-beige relative overflow-hidden">
       {/* Background Decorations */}
@@ -208,12 +244,12 @@ export function CategoriesSection() {
         </div>
 
         {/* Category Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
+        <div className="flex flex-wrap justify-center gap-5 md:gap-8">
           {categories.map((category, index) => (
             <Link
               key={category.id}
               href={`/menu?category=${category.id}`}
-              className="group relative rounded-3xl overflow-hidden aspect-[3/4] shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              className="group relative w-[calc(50%-0.625rem)] min-w-[9rem] max-w-[18rem] sm:w-56 md:w-64 lg:w-72 rounded-3xl overflow-hidden aspect-[3/4] shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <Image

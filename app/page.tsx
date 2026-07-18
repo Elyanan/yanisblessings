@@ -3,6 +3,7 @@ import { JsonLdScript } from '@/components/seo/json-ld-script'
 import { buildLocalBusinessSchema } from '@/lib/seo/json-ld'
 import { buildPageMetadata, pageSeo } from '@/lib/seo/metadata'
 import { getWebsiteImages } from '@/lib/get-website-images'
+import { getHomeCategories } from '@/lib/get-products'
 import { WebsiteImagesProvider } from '@/lib/website-images/context'
 import {
   HeroSection,
@@ -21,7 +22,10 @@ export const metadata: Metadata = buildPageMetadata(pageSeo.home)
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const images = await getWebsiteImages()
+  const [images, homeCategories] = await Promise.all([
+    getWebsiteImages(),
+    getHomeCategories(),
+  ])
 
   return (
     <WebsiteImagesProvider images={images}>
@@ -29,7 +33,7 @@ export default async function HomePage() {
       <main id="main-content" className="min-h-screen">
         <Navbar />
         <HeroSection />
-        <CategoriesSection />
+        <CategoriesSection categories={homeCategories} />
         <WhyUsSection />
         <BestSellersSection />
         <StorySection />

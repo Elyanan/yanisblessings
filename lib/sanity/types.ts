@@ -27,6 +27,7 @@ export type SanityCategory = {
   description?: string
   descriptionAm?: string
   image?: { asset?: { url?: string } }
+  showOnHome?: boolean
   sortOrder?: number
   slug?: { current: string }
 }
